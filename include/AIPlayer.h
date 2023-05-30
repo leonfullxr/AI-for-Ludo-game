@@ -76,5 +76,40 @@ class AIPlayer: public Player{
          * La propuesta es solo sugerencia, los parámetros de la declaración podrían variar.
          */
         //double Poda_AlfaBeta(const Parchis &actual, int jugador, int profundidad, int profundidad_max, color &c_piece, int &id_piece, int &dice, double alpha, double beta, double (*heuristic)(const Parchis &, int)) const;
+    /**
+       _____ _   _ _____ ___  ____  ___    _    _     
+      |_   _| | | |_   _/ _ \|  _ \|_ _|  / \  | |    
+        | | | | | | | || | | | |_) || |  / _ \ | |    
+        | | | |_| | | || |_| |  _ < | | / ___ \| |___ 
+        |_|  \___/  |_| \___/|_| \_\___/_/   \_\_____|
+        **/  
+        void thinkAleatorio(color & c_piece,  int & id_piece, int & dice) const;
+        void thinkAleatorioMasInteligente(color & c_piece,  int & id_piece, int & dice) const;
+        void thinkFichaMasAdelantada(color & c_piece,  int & id_piece, int & dice) const;
+        void thinkMejorOpcion(color & c_piece,  int & id_piece, int & dice) const;
+        void thinkMejorOpcionUsandoEspeciales(color & c_piece,  int & id_piece, int & dice) const;
+
+     /** __  __ ___ ____    __  __ _____ _____ ___  ____   ___  ____  
+        |  \/  |_ _/ ___|  |  \/  | ____|_   _/ _ \|  _ \ / _ \/ ___| 
+        | |\/| || |\___ \  | |\/| |  _|   | || | | | | | | | | \___ \ 
+        | |  | || | ___) | | |  | | |___  | || |_| | |_| | |_| |___) |
+        |_|  |_|___|____/  |_|  |_|_____| |_| \___/|____/ \___/|____/ 
+        **/
+        void thinkGreedy(color & c_piece,  int & id_piece, int & dice) const;
+        double simpleHeuristicSingleColor(const Parchis &estado, color c) const;
+        double Heuristica1(const Parchis &estado, int jugador) const;
+        double ContarDistancia(const Parchis &estado, color c) const;
+        // Segundo Encuentro
+        double Heuristica2(const Parchis &estado, color c, int player) const;
+        double minimax(Parchis &state, int depth, int player, color &best_piece, int &best_dice, bool maximizingPlayer) const;
+        // Tercer Encuentro
+        double Heuristica3(const Parchis &estado, color c, int player) const;
+        bool isVurnerable(const Parchis &estado, color c, int player) const;
+        double enemyDistance(const Parchis &estado, color c, int player) const;
+        bool isBeneficialToLeaveHome(const Parchis &estado, color c, int player) const;
+        double podaAlfaBeta(const Parchis &estado, int jugador, int profundidad, 
+                            color &c_piece, int &dice, 
+                            double alpha, double beta, 
+                            double (*Heuristica3)(const Parchis &, int)) const;
 };
 #endif
