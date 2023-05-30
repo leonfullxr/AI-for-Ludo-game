@@ -107,9 +107,6 @@ class AIPlayer: public Player{
         bool isVurnerable(const Parchis &estado, color c, int player) const;
         double enemyDistance(const Parchis &estado, color c, int player) const;
         bool isBeneficialToLeaveHome(const Parchis &estado, color c, int player) const;
-        double podaAlfaBeta(const Parchis &estado, int jugador, int profundidad, 
-                            color &c_piece, int &dice, 
-                            double alpha, double beta, 
-                            double (*Heuristica3)(const Parchis &, int)) const;
+        double podaAlphaBeta(Parchis &state, int depth, int player, color &best_piece, int &best_dice, bool maximizingPlayer, double alpha, double beta) const;
 };
 #endif
