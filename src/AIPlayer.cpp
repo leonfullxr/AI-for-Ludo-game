@@ -443,74 +443,6 @@ double AIPlayer::Heuristica2(const Parchis &state, color c, int player) const{
     return color_score;
 }
 
-/*
-    _    _     ____   __  __ ___ _   _    ____  __    _    __  __
-   / \  | |   / ___| |  \/  |_ _| \ | |  / /  \/  |  / \   \ \/ /
-  / _ \ | |  | |  _  | |\/| || ||  \| | / /| |\/| | / _ \   \  / 
- / ___ \| |__| |_| | | |  | || || |\  |/ / | |  | |/ ___ \  /  \ 
-/_/   \_\_____\____| |_|  |_|___|_| \_/_/  |_|  |_/_/   \_\/_/\_\
-  
-*/
-// Nivel MAX e1: actual.children()
-// Nivel MIN e2: e1.children() --> no todos los hijos de e1 van a ser MIN --> Sacar un 6 sigue siendo MAX
-
-/*
-ParchisBros children = actual->getChildren();
-    double best_score = menosinf;
-
-    for (auto it = children.begin(); it != children.end(); ++it) {
-        Parchis next_child = *it;
-        ParchisBros grandchildren = next_child.getChildren();
-        for (auto it2 = grandchildren.begin(); it2 != grandchildren.end(); ++it2) {
-            De forma recursiva puedo ir devolviendo la mejor/peor solucion de los hijos dependiendo de si estoy en nodo max/min
-        }
-        double score = Heuristica1(next_child, this->jugador);
-        if (score > best_score) {
-            best_score = score;
-            c_piece = it.getMovedColor();
-            id_piece = it.getMovedPieceId();
-            dice = it.getMovedDiceValue();
-        }
-    }
-*/
-
-double AIPlayer::minimax(Parchis &state, int depth, int player, color &best_piece, int &best_dice, bool maximizingPlayer) const {
-    if (depth == 0 || state.gameOver()) {
-        return Heuristica2(state, best_piece, player);
-    }
-
-    if (maximizingPlayer) {
-        double maxEval = -std::numeric_limits<double>::infinity();
-        ParchisBros children = state.getChildren();
-        color tmp_piece;
-        int tmp_dice;
-        for (auto &child : children) {
-            bool nextMaximizing = child.played_dice == 6 ? true : false;
-            double eval = minimax(child, depth - 1, player, tmp_piece, tmp_dice, nextMaximizing);
-            if (eval > maxEval) {
-                maxEval = eval;
-                best_piece = tmp_piece;
-                best_dice = tmp_dice;
-            }
-        }
-        return maxEval;
-    } else {
-        double minEval = std::numeric_limits<double>::infinity();
-        ParchisBros children = state.getChildren();
-        for (auto &child : children) {
-            bool nextMaximizing = child.played_dice == 6 ? false : true;
-            double eval = minimax(child, depth - 1, player, best_piece, best_dice, nextMaximizing);
-            if (eval < minEval) {
-                minEval = eval;
-                best_piece = child.played_piece;
-                best_dice = child.played_dice;
-            }
-        }
-        return minEval;
-    }
-}
-
-
 // Tercer Encuentro
 bool AIPlayer::isVulnerable(color c, int player) const {
     // Revisa todas las fichas enemigas
@@ -556,6 +488,80 @@ double AIPlayer::Heuristica3(const Parchis &estado, color c, int player) const{
 
 }
 
+/*
+    _    _     ____   __  __ ___ _   _    ____  __    _    __  __
+   / \  | |   / ___| |  \/  |_ _| \ | |  / /  \/  |  / \   \ \/ /
+  / _ \ | |  | |  _  | |\/| || ||  \| | / /| |\/| | / _ \   \  / 
+ / ___ \| |__| |_| | | |  | || || |\  |/ / | |  | |/ ___ \  /  \ 
+/_/   \_\_____\____| |_|  |_|___|_| \_/_/  |_|  |_/_/   \_\/_/\_\
+  
+*/
+// Nivel MAX e1: actual.children()
+// Nivel MIN e2: e1.children() --> no todos los hijos de e1 van a ser MIN --> Sacar un 6 sigue siendo MAX
+
+/*
+ParchisBros children = actual->getChildren();
+    double best_score = menosinf;
+
+    for (auto it = children.begin(); it != children.end(); ++it) {
+        Parchis next_child = *it;
+        ParchisBros grandchildren = next_child.getChildren();
+        for (auto it2 = grandchildren.begin(); it2 != grandchildren.end(); ++it2) {
+            De forma recursiva puedo ir devolviendo la mejor/peor solucion de los hijos dependiendo de si estoy en nodo max/min
+        }
+        double score = Heuristica1(next_child, this->jugador);
+        if (score > best_score) {
+            best_score = score;
+            c_piece = it.getMovedColor();
+            id_piece = it.getMovedPieceId();
+            dice = it.getMovedDiceValue();
+        }
+    }
+*/
+
+double AIPlayer::minimax(Parchis &state, int depth, int player, color &best_piece, int &best_dice, bool maximizingPlayer) const {
+    if (depth == 0 || state.gameOver())
+        return Heuristica2(state, best_piece, player);
+
+    if (maximizingPlayer) {
+        double maxEval = -std::numeric_limits<double>::infinity();
+        ParchisBros children = state.getChildren();
+        color tmp_piece;
+        int tmp_dice;
+        for (auto child = children.begin(); child != children.end(); ++child) {
+            bool nextMaximizing = child.getMovedDiceValue() == 6 ? true : false;
+            double eval = minimax(*child, depth - 1, player, tmp_piece, tmp_dice, nextMaximizing);
+            if (eval > maxEval) {
+                maxEval = eval;
+                best_piece = child.getMovedColor();
+                best_dice = child.getMovedDiceValue();
+            }
+        }
+        return maxEval;
+    } else {
+        double minEval = std::numeric_limits<double>::infinity();
+        ParchisBros children = state.getChildren();
+        for (auto child = children.begin(); child != children.end(); ++child) {
+            bool nextMaximizing = child.getMovedDiceValue() == 6 ? false : true;
+            double eval = minimax(*child, depth - 1, player, best_piece, best_dice, nextMaximizing);
+            if (eval < minEval) {
+                minEval = eval;
+                best_piece = child.getMovedColor();
+                best_dice = child.getMovedDiceValue();
+            }
+        }
+        return minEval;
+    }
+}
+
+/*
+    _    _     ____  _   _    _      ____  _____ _____  _    
+   / \  | |   |  _ \| | | |  / \    | __ )| ____|_   _|/ \   
+  / _ \ | |   | |_) | |_| | / _ \   |  _ \|  _|   | | / _ \  
+ / ___ \| |___|  __/|  _  |/ ___ \  | |_) | |___  | |/ ___ \ 
+/_/   \_\_____|_|   |_| |_/_/   \_\ |____/|_____| |_/_/   \_\
+
+*/
 double AIPlayer::podaAlfaBeta(const Parchis &estado, int jugador, int profundidad, 
                             color &c_piece, int &dice, 
                             double alpha, double beta, 
