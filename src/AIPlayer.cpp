@@ -444,6 +444,7 @@ double AIPlayer::Heuristica2(const Parchis &state, color c, int player) const{
 }
 
 // Tercer Encuentro
+// TODO: Implementar
 bool AIPlayer::isVulnerable(color c, int player) const {
     // Revisa todas las fichas enemigas
     for (each enemy piece) {
@@ -471,6 +472,7 @@ double AIPlayer::enemyDistance(color c, int player) const {
     return min_distance;
 }
 
+// TODO: Implementar
 bool AIPlayer::isBeneficialToLeaveHome(color c, int player) const {
     // Implement your own logic here. For example, one basic strategy could be:
     // Si todas las fichas están en casa o en la meta, es beneficioso sacar una de casa
