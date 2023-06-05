@@ -462,11 +462,10 @@ bool AIPlayer::isVulnerable(const Parchis &estado, color c, int player) const {
 /**
  * @brief Calcula la distancia mas corta entre la fichas actuales del jugador y las fichas enemigas más cercanas
  * @param estado estado actual del juego
- * @param c color del jugador no enemigo
  * @param player jugador actual no enemigo
  * @return double 
  */
-double AIPlayer::enemyDistance(const Parchis &estado, color c, int player) const {
+double AIPlayer::enemyDistance(const Parchis &estado, int player) const {
     double min_distance = masinf;
     // Revisa todas las fichas del jugador enemigo
     int enemy = (player + 1) % 2;
