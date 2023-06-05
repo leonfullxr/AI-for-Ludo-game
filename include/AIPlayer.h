@@ -111,6 +111,8 @@ class AIPlayer: public Player{
         bool isPieceOneSquareFromCorridor(const Piece &piece) const;
         bool clearPathBetweenTwoSquares(const Parchis &state, const Box &b1, const Box &b2, const Piece &piece) const; // Comprueba si se puede transitar desde b1 hasta b2
         Box calculateBoxType(const Piece &piece, const int positionIncrement) const;
+        bool pieceCanBeEatenByRedShell(const Parchis &state, const Piece &piece, int enemyPlayer, const Piece &targetPiece) const;
+        bool pieceCanBeEatenByBlueShell(const Parchis &state, const Piece &piece, int enemyPlayer, const Piece &targetPiece) const;
         double podaAlphaBeta(Parchis &state, int depth, int player, color &best_piece, int &best_dice, bool maximizingPlayer, double alpha, double beta) const;
 
     private:

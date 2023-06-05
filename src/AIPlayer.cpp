@@ -457,7 +457,10 @@ bool AIPlayer::isVulnerablePiece(const Parchis &estado, const Piece &piece, int 
     //     }
     // }
     // return false;
+    if (piece.get_type() == (star_piece or boo_piece)) return false;
+    
     int enemyId = (player + 1) % 2; // 0 o 1
+    
     for (auto enemyColor : estado.getPlayerColors(enemyId)) {
         for (auto enemyPiece : estado.getBoard().getPieces(enemyColor)) {
             for (auto enemyDice : estado.getAvailableNormalDices(enemyId)) {    // Piezas normales
@@ -465,12 +468,33 @@ bool AIPlayer::isVulnerablePiece(const Parchis &estado, const Piece &piece, int 
                     clearPathBetweenTwoSquares(estado,calculateBoxType(enemyPiece,0),calculateBoxType(piece,0),enemyPiece)) {
                         return true;
                 }
+                if (enemyPiece.get_type() == star_piece and enemyPiece.get_box().type == normal and
+                    (std::abs(enemyPiece.get_box().num - piece.get_box().num) > enemyDice)) {   // Siendo una ficha estrella se lo come si le sobrepasa
+                        return true;
+                }
             }
             for (auto enemySpecialDice : estado.getAvailableSpecialDices(enemyId)) {    // Piezas especiales
-
+                if (enemySpecialDice == bullet) {
+                    Box goalPosition = estado.computeMove(enemyPiece,enemySpecialDice,NULL); //TODO: comprobar si se tiene que pasar NULL
+                    if (goalPosition.type == normal and goalPosition.num == piece.get_box().num and
+                        !estado.isSafeBox(goalPosition)) {
+                            return true;
+                    }
+                } else if (enemySpecialDice == mushroom) {
+                    Box goalPosition = estado.computeMove(enemyPiece,enemySpecialDice,NULL); //TODO: comprobar si se tiene que pasar NULL
+                    if (goalPosition.type == normal and goalPosition.num == piece.get_box().num and
+                        !estado.isSafeBox(goalPosition)) {
+                            return true;
+                    }
+                } else if (enemySpecialDice == horn) {
+                    if (std::abs(enemyPiece.get_box().num - piece.get_box().num) <= 2) {
+                        return true;
+                    }
+                }
             }
         }
-    }    
+    }   
+    return false; 
 }
 
 /**
@@ -606,6 +630,71 @@ Box AIPlayer::calculateBoxType(const Piece &piece, const int positionIncrement) 
     } else {                        // Normal
         return Box(boxPosition,normal,none);
     }
+}
+
+
+bool AIPlayer::pieceCanBeEatenByRedShell(const Parchis &state, const Piece &piece, int enemyPlayer, const Piece &targetPiece) const{
+    for (auto enemySpecialDice : state.getAvailableSpecialDices(enemyPlayer)) {
+        if (enemySpecialDice == horn)   return false;
+    }
+
+    int minDistance = static_cast<int>(masinf);
+    Piece closestPiece(piece);
+
+    for (auto enemyColor : state.getPlayerColors(enemyPlayer)) {
+        for (auto enemyPiece : state.getBoard().getPieces(enemyColor)) {
+            int distance = enemyPiece.get_box().num - piece.get_box().num; 
+                    
+            if (distance < minDistance and distance > 0) {
+                minDistance = distance;
+                closestPiece = enemyPiece;
+            }
+        }
+    }
+
+    for (auto myPiece : state.getBoard().getPieces(static_cast<color>((piece.get_color()+2)%4))) {
+        int distance = myPiece.get_box().num - piece.get_box().num;
+
+        if (distance < minDistance and distance > 0) {
+            minDistance = distance;
+            closestPiece = myPiece;
+        }
+    }
+    return targetPiece.get_box().num == closestPiece.get_box().num;
+}
+
+bool AIPlayer::pieceCanBeEatenByBlueShell(const Parchis &state, const Piece &piece, int enemyPlayer, const Piece &targetPiece) const{
+    for (auto enemySpecialDice : state.getAvailableSpecialDices(enemyPlayer)) {
+        if (enemySpecialDice == horn)   return false;
+    }
+
+    int minDistance = static_cast<int>(masinf);
+    Piece closestPiece(piece);
+
+    for (auto enemyColor : state.getPlayerColors(enemyPlayer)) {
+        int i = 0;
+        for (auto enemyPiece : state.getBoard().getPieces(enemyColor)) {
+            int distance = state.distanceToGoal(enemyColor,i);
+                    
+            if (distance < minDistance and distance > 0) {
+                minDistance = distance;
+                closestPiece = enemyPiece;
+            }
+            i++;
+        }
+    }
+
+    int i = 0;
+    for (auto myPiece : state.getBoard().getPieces(static_cast<color>((piece.get_color()+2)%4))) {
+        int distance = state.distanceToGoal(static_cast<color>((piece.get_color()+2)%4),i);
+
+        if (distance < minDistance and distance > 0) {
+            minDistance = distance;
+            closestPiece = myPiece;
+        }
+        i++;
+    }
+    return targetPiece.get_box().num == closestPiece.get_box().num;
 }
 
 double AIPlayer::Heuristica3(const Parchis &estado, color c, int player) const{
