@@ -444,15 +444,44 @@ double AIPlayer::Heuristica2(const Parchis &state, color c, int player) const{
 }
 
 // Tercer Encuentro
-// TODO: Implementar
-bool AIPlayer::isVulnerable(color c, int player) const {
-    // Revisa todas las fichas enemigas
-    for (each enemy piece) {
-        // Si la ficha enemiga puede llegar a la ficha actual en el próximo turno
-        if (distance between enemy piece and this piece <= 6) { // 6 es el máximo valor de un dado
-            // Si la ficha no está en una casilla segura
-            if (!state.isSafePiece(c, player)) {
-                return true;
+bool AIPlayer::isVulnerable(const Parchis &estado, color c, int player) const {
+    // // Revisa todas las fichas enemigas
+    // for (each enemy piece) {
+    //     // Si la ficha enemiga puede llegar a la ficha actual en el próximo turno
+    //     if (distance between enemy piece and this piece <= 6) { // 6 es el máximo valor de un dado
+    //         // Si la ficha no está en una casilla segura
+    //         if (!state.isSafePiece(c, player)) {
+    //             return true;
+    //         }
+    //     }
+    // }
+    // return false;
+}
+
+/**
+ * @brief Calcula la distancia entre la ficha actual y la ficha enemiga más cercana
+ * 
+ * @param estado estado actual del juego
+ * @param c 
+ * @param player jugador actual no enemigo
+ * @return double 
+ */
+double AIPlayer::enemyDistance(const Parchis &estado, color c, int player) const {
+    double min_distance = masinf;
+    // Revisa todas las fichas del jugador enemigo
+    int enemy = (player + 1) % 2;
+    estado.getPlayerColors(enemy);
+    
+    for (auto color : estado.getPlayerColors(enemy)) { // Itero sobre los colores del jugador
+        for (auto piece : estado.getBoard().getPieces(color)) { // Itero sobre las fichas de cada color del enemigo
+            
+            if (piece.get_box().type == (home or normal) and
+                estado.getBoard().getPiece(c,).get_box().type == (home or normal)) {  // Si la ficha está en casa o en una casilla normal
+                double distance = std::abs(estado.getBoard().getPiece(c,).get_box().num - piece.get_box().num);
+                
+                if (distance < min_distance) {
+                    min_distance = distance;
+                }
             }
         }
     }
@@ -523,7 +552,7 @@ ParchisBros children = actual->getChildren();
 
 double AIPlayer::minimax(Parchis &state, int depth, int player, color &best_piece, int &best_dice, bool maximizingPlayer) const {
     if (depth == 0 || state.gameOver())
-        return Heuristica2(state, best_piece, player);
+        return Heuristica2(state, best_piece, player); // Dependiendo de la Heuristica que escojamos
 
     if (maximizingPlayer) {
         double maxEval = -std::numeric_limits<double>::infinity();
@@ -564,9 +593,43 @@ double AIPlayer::minimax(Parchis &state, int depth, int player, color &best_piec
 /_/   \_\_____|_|   |_| |_/_/   \_\ |____/|_____| |_/_/   \_\
 
 */
-double AIPlayer::podaAlfaBeta(const Parchis &estado, int jugador, int profundidad, 
-                            color &c_piece, int &dice, 
-                            double alpha, double beta, 
-                            double (*Heuristica3)(const Parchis &, int)) const{
+double AIPlayer::podaAlphaBeta(Parchis &state, int depth, int player, color &best_piece, int &best_dice, bool maximizingPlayer, double alpha, double beta) const {
+    if (depth == 0 || state.gameOver())
+        return Heuristica2(state, best_piece, player);
 
+    if (maximizingPlayer) {
+        double maxEval = -std::numeric_limits<double>::infinity();
+        ParchisBros children = state.getChildren();
+        color tmp_piece;
+        int tmp_dice;
+        for (auto child = children.begin(); child != children.end(); ++child) {
+            bool nextMaximizing = child.getMovedDiceValue() == 6 ? true : false;
+            double eval = podaAlphaBeta(*child, depth - 1, player, tmp_piece, tmp_dice, nextMaximizing, alpha, beta);
+            if (eval > maxEval) {
+                maxEval = eval;
+                best_piece = child.getMovedColor();
+                best_dice = child.getMovedDiceValue();
+            }
+            alpha = std::max(alpha, eval);
+            if (beta <= alpha) // Poda Beta
+                break;
+        }
+        return maxEval;
+    } else {
+        double minEval = std::numeric_limits<double>::infinity();
+        ParchisBros children = state.getChildren();
+        for (auto child = children.begin(); child != children.end(); ++child) {
+            bool nextMaximizing = child.getMovedDiceValue() == 6 ? false : true;
+            double eval = podaAlphaBeta(*child, depth - 1, player, best_piece, best_dice, nextMaximizing, alpha, beta);
+            if (eval < minEval) {
+                minEval = eval;
+                best_piece = child.getMovedColor();
+                best_dice = child.getMovedDiceValue();
+            }
+            beta = std::min(beta, eval);
+            if (beta <= alpha) // Poda Alpha
+                break;
+        }
+        return minEval;
+    }
 }
