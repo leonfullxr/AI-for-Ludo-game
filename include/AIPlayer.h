@@ -106,8 +106,11 @@ class AIPlayer: public Player{
         double Heuristica3(const Parchis &estado, color c, int player) const;
         bool isVulnerable(const Parchis &estado, color c, int player) const;
         double enemyDistance(const Parchis &estado, int player) const;
-        bool isBeneficialToLeaveHome(const Parchis &estado, color c, int player) const;
-        bool pieceInHome(const Piece &piece) const;
+        bool isBeneficialToLeaveHome(const Parchis &estado, const Piece &piece, int player) const;
+        bool isPieceInHome(const Piece &piece) const;
+        bool isPieceOneSquareFromCorridor(const Piece &piece) const;
+        bool clearPathBetweenTwoSquares(const Parchis &state, const Box &b1, const Box &b2, const Piece &piece) const; // Comprueba si se puede transitar desde b1 hasta b2
+        Box calculateBoxType(const Piece &piece, const int positionIncrement) const;
         double podaAlphaBeta(Parchis &state, int depth, int player, color &best_piece, int &best_dice, bool maximizingPlayer, double alpha, double beta) const;
 
     private:

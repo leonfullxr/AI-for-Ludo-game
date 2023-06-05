@@ -460,7 +460,7 @@ bool AIPlayer::isVulnerable(const Parchis &estado, color c, int player) const {
 }
 
 /**
- * @brief Calcula la distancia mas corta entre la fichas actuales del jugador y las fichas enemigas más cercanas
+ * @brief Calcula la distancia mas corta entre la fichas actuales del jugador y las fichas enemigas más cercanas con posibilidad de ser comido
  * @param estado estado actual del juego
  * @param player jugador actual no enemigo
  * @return la distancia minima de una ficha enemiga 
@@ -475,15 +475,18 @@ double AIPlayer::enemyDistance(const Parchis &estado, int player) const {
     for (auto color : estado.getPlayerColors(player)) { // Itero sobre los colores del jugador no enemigo
         for (auto piece : estado.getBoard().getPieces(color)) { // Itero sobre las fichas del jugador no enemigo
             if (piece.get_box().num != 0)                       // Queremos que la ficha esté disponible
-                fichas_jugador.push_back(estado.getBoard().getPiece(color,piece.get_box().num)); // Voy guardando las fichas disponibles del jugador no enemigo
+                fichas_jugador.push_back(piece); // Voy guardando las fichas disponibles del jugador no enemigo
         }
     }
     
     for (auto enemyColor : estado.getPlayerColors(enemy)) {                 // Itero sobre los colores del jugador enemigo
         for (auto enemyPiece : estado.getBoard().getPieces(enemyColor)) {   // Itero sobre las fichas de cada color del enemigo
             for (auto playerPiece : fichas_jugador) {                       // Itero sobre las fichas del jugador no enemigo
-                if (enemyPiece.get_box().type == (pieceInHome(enemyPiece) or normal) and
-                    playerPiece.get_box().type == (pieceInHome(playerPiece) or normal)) {           // Si la ficha está en casa o en una casilla normal
+                if (enemyPiece.get_box().type == (isPieceInHome(enemyPiece) or normal) and
+                    playerPiece.get_box().type == (isPieceInHome(playerPiece) or normal) and
+                    !isPieceOneSquareFromCorridor(playerPiece) and
+                    !estado.isSafeBox(playerPiece.get_box()) and
+                    !(playerPiece.get_type() == (star_piece or boo_piece))) {   // Si la ficha puede ser comida
                     double distance = playerPiece.get_box().num - enemyPiece.get_box().num;
                     
                     if (distance < min_distance and distance > 0) {
@@ -497,34 +500,81 @@ double AIPlayer::enemyDistance(const Parchis &estado, int player) const {
     return min_distance;
 }
 
-// TODO: falta por implementar
 // Podemos calcularlo en base a si hay fichas enemigas que puedan comernos con objetos
 // o incluso tambien llamar a la funcion enemyDistance() para poder saber si en el 
 // siguiente turno una ficha nos podría comer fácilmente.
-bool AIPlayer::isBeneficialToLeaveHome(const Parchis &estado, color c, int player) const {
-    vector<Piece> available_player_pieces;  // Estas serán únicamente las fichas que estén en casa
-
-    for (auto playerColor : estado.getPlayerColors(player)) {
-        for (auto playerPieces : estado.getBoard().getPieces(playerColor)) {
-            if (playerPieces.get_box().type == (home)) 
-                available_player_pieces.push_back(playerPieces);
-            
+bool AIPlayer::isBeneficialToLeaveHome(const Parchis &estado, const Piece &piece, int player) const {
+    // Si una ficha en casa podría moverse a una casilla segura en el próximo turno
+    for (auto dice : estado.getAllAvailableDices(player)) {
+        Box goalBox = calculateBoxType(piece,dice);
+        if (estado.isSafeBox(goalBox) and clearPathBetweenTwoSquares(estado,piece.get_box(),goalBox,piece)) {
+            return true;
         }
     }
+    
+    return false;
+}
 
-    // Si una ficha en casa podría moverse a una casilla segura en el próximo turno
-    if (distance to nearest safe spot from home <= 6) { // 6 es el máximo valor de un dado
+bool AIPlayer::isPieceInHome(const Piece &piece) const{
+    if (piece.get_box().type == normal)
+        if (piece.get_box().num == (BLUE or RED or GREEN or YELLOW)) // El color de cada casilla de casa + avance (sacando la ficha de casa)
+            return true;
+    return false;
+}
+
+bool AIPlayer::isPieceOneSquareFromCorridor(const Piece &piece) const{
+    if (piece.get_box().type == normal)
+        if (piece.get_box().num == (17 or 34 or 51 or 68))
+            return true;
+    return false;
+}
+
+bool AIPlayer::clearPathBetweenTwoSquares(const Parchis &state, const Box &b1, const Box &b2, const Piece &piece) const{
+    bool noMegaWall = state.anyMegaWall(b1, b2).empty();
+    bool noWall = state.anyWall(b1, b2).empty();
+    bool noTrap = state.anyTrap(b1, b2).empty();
+    
+    if (noMegaWall and noWall and noTrap) {
+        return true;
+    }else if ((!noMegaWall and piece.get_type() == boo_piece) and noTrap and noWall) { // Hay MegaWall pero la ficha esta en estado boo
+        return true;
+    }else if ((!noTrap and piece.get_type() == (boo_piece or mega_piece or star_piece)) and noMegaWall and noWall) {   // Hay un platano pero la ficha está en estado boo, invencible o mega
+        return true;
+    }else if ((!noWall and piece.get_type() == (boo_piece or star_piece)) and noMegaWall and noTrap) { // Hay una barrera normal pero la ficha esta en estado boo o invencible
         return true;
     }
     
     return false;
 }
 
-bool AIPlayer::pieceInHome(const Piece &piece) const{
-    if (piece.get_type() == normal)
-        if (piece.get_box().num == (BLUE or RED or GREEN or YELLOW)) // El color de casa+1
-            return true;
-    return false;
+Box AIPlayer::calculateBoxType(const Piece &piece, const int positionIncrement) const{
+    int module, boxPosition;
+
+    if (piece.get_box().num == 0) return Box(0,home,piece.get_color());
+
+    if (piece.get_color() == blue) {
+        module = BLUE - 4;
+        boxPosition = (piece.get_box().num + positionIncrement) % module;
+    } else if (piece.get_color() == red) {
+        module = RED - 4;
+        boxPosition = (piece.get_box().num + positionIncrement) % module;
+    } else if (piece.get_color() == green) {
+        module = GREEN - 4;
+        boxPosition = (piece.get_box().num + positionIncrement) % module;
+    } else if (piece.get_color() == yellow) {
+        module = YELLOW - 4;
+        boxPosition = (piece.get_box().num + positionIncrement) % module;
+    } else {
+        return Box();
+    }
+
+    if (boxPosition < module) {     // Corridor
+        return Box(boxPosition,final_queue,piece.get_color());
+    } else if (boxPosition == 8){   // Goal
+        return Box(boxPosition,goal,piece.get_color());
+    } else {                        // Normal
+        return Box(boxPosition,normal,none);
+    }
 }
 
 double AIPlayer::Heuristica3(const Parchis &estado, color c, int player) const{
