@@ -104,7 +104,7 @@ class AIPlayer: public Player{
         double minimax(Parchis &state, int depth, int player, color &best_piece, int &best_dice, bool maximizingPlayer) const;
         // Tercer Encuentro
         double Heuristica3(const Parchis &estado, color c, int player) const;
-        bool isVulnerable(const Parchis &estado, color c, int player) const;
+        bool isVulnerablePiece(const Parchis &estado, const Piece &piece, int player) const;
         double enemyDistance(const Parchis &estado, int player) const;
         bool isBeneficialToLeaveHome(const Parchis &estado, const Piece &piece, int player) const;
         bool isPieceInHome(const Piece &piece) const;

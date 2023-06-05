@@ -445,7 +445,7 @@ double AIPlayer::Heuristica2(const Parchis &state, color c, int player) const{
 
 // Tercer Encuentro
 // TODO: falta por implementar
-bool AIPlayer::isVulnerable(const Parchis &estado, color c, int player) const {
+bool AIPlayer::isVulnerablePiece(const Parchis &estado, const Piece &piece, int player) const {
     // // Revisa todas las fichas enemigas
     // for (each enemy piece) {
     //     // Si la ficha enemiga puede llegar a la ficha actual en el próximo turno
@@ -457,6 +457,14 @@ bool AIPlayer::isVulnerable(const Parchis &estado, color c, int player) const {
     //     }
     // }
     // return false;
+    int enemyId = (player + 1) % 2; // 0 o 1
+    for (auto enemyColor : estado.getPlayerColors(enemyId)) {
+        for (auto enemyPiece : estado.getBoard().getPieces(enemyColor)) {
+            for (auto enemyDice : estado.getAvailableNormalDices(enemyId)) {
+                if (!estado.isSafeBox(calculateBoxType(piece,0)) and enemyDistance(estado,player))
+            }
+        }
+    }    
 }
 
 /**
@@ -548,7 +556,7 @@ bool AIPlayer::clearPathBetweenTwoSquares(const Parchis &state, const Box &b1, c
 }
 
 Box AIPlayer::calculateBoxType(const Piece &piece, const int positionIncrement) const{
-    int module, boxPosition;
+    int module, boxPosition, oneSquareFromCorridor;
 
     if (piece.get_box().num == 0) return Box(0,home,piece.get_color());
 
@@ -568,10 +576,14 @@ Box AIPlayer::calculateBoxType(const Piece &piece, const int positionIncrement) 
         return Box();
     }
 
+    oneSquareFromCorridor = module;
+
     if (boxPosition < module) {     // Corridor
         return Box(boxPosition,final_queue,piece.get_color());
     } else if (boxPosition == 8){   // Goal
         return Box(boxPosition,goal,piece.get_color());
+    } else if (boxPosition == 0) {
+        return Box(module,normal,none);
     } else {                        // Normal
         return Box(boxPosition,normal,none);
     }
