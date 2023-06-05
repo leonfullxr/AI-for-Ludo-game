@@ -102,7 +102,15 @@ Al implementar la heuristica, voy a priorizar lo siguiente de mayor a menor:
 * **Coger** un **objeto** del tablero
 * Ya lo último sería simplemente **analizar** la **posicion** en la que esta la ficha, el valor corresponderia con la distancia necesaria para llegar a la meta.
 
-//TODO: falta rellenarlo
+### Inconvenientes
+Como era de esperar, es evidente que esta heurística no es buena, pues trata a todos los objetos por igual, es decir, lo suyo es aplicarle valores a cada objeto dependiendo del estado del tablero, algo que tendré en cuenta al mejorar esta heurística.
+* Asignarle **valores** **dinámicos** a los **objetos** (dependiendo del estado del tablero los objetos son mejores/neutros).
+* Asignarle **prioridades** a los objetos, es decir, si hay una **ficha** enemiga **cerca** de la **meta** es muy bueno usar la **concha azul**, incluso si hay dos fichas enemigas formando una barrera, se usaría la concha para eliminar ambas fichas que forman la barrera y darle via libre a alguna ficha que quedó bloqueada por la barrera.
+
+### Pseudocodigo
+```java
+
+```
 
 ## Implementacion Min/Max
 ### Pseudocodigo
@@ -144,13 +152,15 @@ Mejoras para tener una heuristica mas sofisticada:<br>
 - 3.Considerar la probabilidad de ser **comido** por un **enemigo**: De forma similar al primer punto, podrías disminuir la puntuación de una ficha si está en peligro de ser comida por un enemigo en los próximos turnos.
 - 4.**Estrategia** de **salida**: Podrías tener una estrategia para decidir cuándo es el mejor momento para sacar una ficha de la casa. Por ejemplo, podría ser beneficioso esperar hasta que todas las fichas enemigas estén lejos de la casa.
 - 5.Agregar una **penalización** para las jugadas que dejan a las **fichas vulnerables**: Aunque es beneficioso comer fichas enemigas, deberías considerar las consecuencias de tus acciones. Si mover una ficha a una posición determinada aumenta la posibilidad de ser comido en el próximo turno, es posible que desees descontar algunos puntos de esa acción.
-
+- 6.Devolver el **valor máximo** si el estado del tablero contiene la **victoria** del jugador, algo que no he tenido en cuenta anteriormente, pues no habria que realizar ninguna comprobacion mas, el jugador simplemente ha ganado.
 Hay muchas otras formas de mejorar la heurística. Estas son solo algunas ideas para empezar, no obstante, voy a intentar implementarlo con funciones auxiliares para que sea mas sencillo de entender e implementar. Al final, lo que realmente decide si la heuristica es mejor es a traves de la experimentacion, es decir, probando diferentes heurísticas y viendo cual es la que mejor funciona. Esto tendre que hacerlo mediante algun script que me permita jugar contra mi mismo y ver cual es la que mejor funciona. El script lo implementaré en el siguiente encuentro.
 
 ### Pseudocodigo
 ```java
 funcion Heuristica3() {
     // todo lo mismo que en la Heuristica2 pero añadiendo lo siguiente
+    if (jugador gana)   return +inf;
+    if (jugador pierde) return -inf;
     // ...
     const double score_vulnerable = -500; // Ser vulnerable a ser comido
     const double score_enemy_near = 300; // Un enemigo está cerca y puede ser comido
