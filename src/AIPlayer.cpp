@@ -444,19 +444,8 @@ double AIPlayer::Heuristica2(const Parchis &state, color c, int player) const{
 }
 
 // Tercer Encuentro
-// TODO: falta por implementar
+// TODO: falta por revisar
 bool AIPlayer::isVulnerablePiece(const Parchis &estado, const Piece &piece, int player) const {
-    // // Revisa todas las fichas enemigas
-    // for (each enemy piece) {
-    //     // Si la ficha enemiga puede llegar a la ficha actual en el próximo turno
-    //     if (distance between enemy piece and this piece <= 6) { // 6 es el máximo valor de un dado
-    //         // Si la ficha no está en una casilla segura
-    //         if (!state.isSafePiece(c, player)) {
-    //             return true;
-    //         }
-    //     }
-    // }
-    // return false;
     if (piece.get_type() == (star_piece or boo_piece)) return false;
     
     int enemyId = (player + 1) % 2; // 0 o 1
@@ -490,6 +479,10 @@ bool AIPlayer::isVulnerablePiece(const Parchis &estado, const Piece &piece, int 
                     if (std::abs(enemyPiece.get_box().num - piece.get_box().num) <= 2) {
                         return true;
                     }
+                } else if (enemySpecialDice == blue_shell and pieceCanBeEatenByRedShell(estado,enemyPiece,enemyId,piece)) {
+                    return true;
+                } else if (enemySpecialDice == red_shell and pieceCanBeEatenByBlueShell(estado,enemyPiece,enemyId,piece)) {
+                    return true;
                 }
             }
         }
