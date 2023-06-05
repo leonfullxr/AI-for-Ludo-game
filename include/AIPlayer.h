@@ -107,6 +107,15 @@ class AIPlayer: public Player{
         bool isVulnerable(const Parchis &estado, color c, int player) const;
         double enemyDistance(const Parchis &estado, int player) const;
         bool isBeneficialToLeaveHome(const Parchis &estado, color c, int player) const;
+        bool pieceInHome(const Piece &piece) const;
         double podaAlphaBeta(Parchis &state, int depth, int player, color &best_piece, int &best_dice, bool maximizingPlayer, double alpha, double beta) const;
+
+    private:
+        enum ColorCasa{
+            BLUE = 21,
+            RED = 38,
+            GREEN = 55,
+            YELLOW = 4,
+        };
 };
 #endif
