@@ -464,13 +464,14 @@ bool AIPlayer::isVulnerablePiece(const Parchis &estado, const Piece &piece, int 
             }
             for (auto enemySpecialDice : estado.getAvailableSpecialDices(enemyId)) {    // Piezas especiales
                 if (enemySpecialDice == bullet) {
-                    Box goalPosition = estado.computeMove(enemyPiece,enemySpecialDice,NULL); //TODO: comprobar si se tiene que pasar NULL
+                    Box goalPosition = estado.computeSpecialMove(piece, enemySpecialDice);
+
                     if (goalPosition.type == normal and goalPosition.num == piece.get_box().num and
                         !estado.isSafeBox(goalPosition)) {
                             return true;
                     }
                 } else if (enemySpecialDice == mushroom) {
-                    Box goalPosition = estado.computeMove(enemyPiece,enemySpecialDice,NULL); //TODO: comprobar si se tiene que pasar NULL
+                    Box goalPosition = estado.computeSpecialMove(piece, enemySpecialDice);
                     if (goalPosition.type == normal and goalPosition.num == piece.get_box().num and
                         !estado.isSafeBox(goalPosition)) {
                             return true;
@@ -544,12 +545,12 @@ bool AIPlayer::isBeneficialToLeaveHome(const Parchis &estado, const Piece &piece
     }
     for (auto specialDice : estado.getAvailableSpecialDices(player)) {
         if (specialDice == bullet) {
-            Box goalBox = estado.computeMove(piece, specialDice, NULL); // TODO: comprobar que hay que pasa un NULL
+            Box goalBox = estado.computeSpecialMove(piece, specialDice);
             if (estado.isSafeBox(goalBox) and clearPathBetweenTwoSquares(estado,piece.get_box(),goalBox,piece)) {
                 return true;
             }
         } else if (specialDice == mushroom) {
-            Box goalBox = estado.computeMove(piece, specialDice, NULL);
+            Box goalBox = estado.computeSpecialMove(piece, specialDice);
             if (estado.isSafeBox(goalBox) and clearPathBetweenTwoSquares(estado,piece.get_box(),goalBox,piece)) {
                 return true;
             }
