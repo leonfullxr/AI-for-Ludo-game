@@ -463,7 +463,7 @@ bool AIPlayer::isVulnerable(const Parchis &estado, color c, int player) const {
  * @brief Calcula la distancia mas corta entre la fichas actuales del jugador y las fichas enemigas más cercanas
  * @param estado estado actual del juego
  * @param player jugador actual no enemigo
- * @return double 
+ * @return la distancia minima de una ficha enemiga 
  */
 double AIPlayer::enemyDistance(const Parchis &estado, int player) const {
     double min_distance = masinf;
@@ -484,9 +484,9 @@ double AIPlayer::enemyDistance(const Parchis &estado, int player) const {
             for (auto playerPiece : fichas_jugador) {                       // Itero sobre las fichas del jugador no enemigo
                 if (enemyPiece.get_box().type == (pieceInHome(enemyPiece) or normal) and
                     playerPiece.get_box().type == (pieceInHome(playerPiece) or normal)) {           // Si la ficha está en casa o en una casilla normal
-                    double distance = std::abs(playerPiece.get_box().num - enemyPiece.get_box().num);
+                    double distance = playerPiece.get_box().num - enemyPiece.get_box().num;
                     
-                    if (distance < min_distance) {
+                    if (distance < min_distance and distance > 0) {
                         min_distance = distance;
                     }
                 }
