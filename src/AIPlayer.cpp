@@ -318,6 +318,22 @@ void AIPlayer::thinkMejorOpcionUsandoEspeciales(color & c_piece, int & id_piece,
 |_|  |_|___|____/  |_|  |_|_____| |_| \___/|____/ \___/|____/     |
 // ---------------------------------------------------------------|
 **/
+
+/*
+ _____ _   _ _   _  ____ ___ ___  _   _ _____ ____  
+|  ___| | | | \ | |/ ___|_ _/ _ \| \ | | ____/ ___| 
+| |_  | | | |  \| | |    | | | | |  \| |  _| \___ \ 
+|  _| | |_| | |\  | |___ | | |_| | |\  | |___ ___) |
+|_|    \___/|_| \_|\____|___\___/|_| \_|_____|____/ 
+                                                    
+    _   _   ___  _____ _     ___    _    ____  _____ ____  
+   / \ | | | \ \/ /_ _| |   |_ _|  / \  |  _ \| ____/ ___| 
+  / _ \| | | |\  / | || |    | |  / _ \ | |_) |  _| \___ \ 
+ / ___ \ |_| |/  \ | || |___ | | / ___ \|  _ <| |___ ___) |
+/_/   \_\___//_/\_\___|_____|___/_/   \_\_| \_\_____|____/ 
+ 
+*/
+// Primer y Segundo encuentro
 double AIPlayer::ContarDistancia(const Parchis &state, color c) const{
     double color_score = 0;
     // 65 de moverte hasta la entrada del pasillo
@@ -357,90 +373,6 @@ void AIPlayer::thinkGreedy(color &c_piece, int &id_piece, int &dice) const{
             dice = it.getMovedDiceValue();
         }
     }
-}
-
-double AIPlayer::Heuristica1(const Parchis &state, int player) const{
-    double score = 0;
-
-    for (int i = 0; i < 2; i++) {
-        double sign = ((i == player) ? 1 : -1);
-        // for c in colores
-        vector<color> colors = state.getPlayerColors(i);
-        for (color c : colors) {
-            score += sign * ContarDistancia(state, c);
-        }
-    }
-    return score;
-}
-
-double AIPlayer::Heuristica2(const Parchis &state, color c, int player) const{
-    // Siguiendo un poco la jerarquia explicada en la memoria:
-    double color_score = 0;
-    // 65 de moverte hasta la entrada del pasillo
-    // final, + 8 casillas del pasillo + 1
-    const int max_distance = (65 +8 + 1);
-    
-    // Puntuaciones por cada acción
-    const double score_goal = 10000; // Llegar a la meta
-    const double score_corridor = 500; // Llegar al pasillo de la meta
-    const double score_eat = 200; // Comer una ficha enemiga / ser comido
-    const double score_barrier = 150; // Formar una barrera
-    const double score_safe = 100; // Llegar a una casilla segura
-    const double score_out = 50; // Sacar una ficha de casa
-    const double score_object = 25; // Coger un objeto del tablero
-
-    for (int j = 0; j < 2; j++) {
-        double sign = ((j == player) ? 1 : -1);
-        vector<color> colors = state.getPlayerColors(j);
-        for (color c : colors) {
-            double progress = (double) (max_distance - state.distanceToGoal(c,j));
-            bool is_safe = state.isSafePiece(c,j);
-            bool is_corridor = state.getBoard().getPiece(c,j).get_box().type == final_queue;
-            bool is_goal = state.getBoard().getPiece(c,j).get_box().type == goal;
-            bool is_home = state.getBoard().getPiece(c,j).get_box().type == home;
-
-            double multplier = max(1.,max(1.5*is_safe, 2.*(is_corridor or is_goal)));
-            color_score += pow(progress*multplier, 2.);
-            
-            // Comprobar si la ficha está en la meta
-            if (is_goal) {
-                color_score += score_goal;
-            }
-            
-            // Comprobar si la ficha está en el pasillo
-            if (is_corridor) {
-                color_score += score_corridor;
-            }
-            
-            // Comprobar si la ficha ha comido a una enemiga
-            if (state.isEatingMove()) {
-                color_score += score_eat;
-            }
-            
-            // Comprobar si la ficha ha formado una barrera
-            if (state.isWall(state.getBoard().getPiece(c,j).get_box()) == c or 
-                state.isMegaWall(state.getBoard().getPiece(c,j).get_box()) == c) {
-                color_score += score_barrier;
-            }
-            
-            // Comprobar si la ficha está en una casilla segura
-            if (is_safe) {
-                color_score += score_safe;
-            }
-            
-            // Comprobar si la ficha ha salido de casa
-            if (is_home) {
-                color_score += score_out;
-            }
-            
-            // Comprobar si la ficha ha cogido un objeto
-            if (state.itemAcquired()) {
-                color_score += score_object;
-            }
-            color_score *= sign;
-        }
-    }
-    return color_score;
 }
 
 // Tercer Encuentro
@@ -691,9 +623,106 @@ bool AIPlayer::pieceCanBeEatenByBlueShell(const Parchis &state, const Piece &pie
     return targetPiece.get_box().num == closestPiece.get_box().num;
 }
 
+/*
+ _   _ _____ _   _ ____  ___ ____ _____ ___ ____    _    ____  
+| | | | ____| | | |  _ \|_ _/ ___|_   _|_ _/ ___|  / \  / ___| 
+| |_| |  _| | | | | |_) || |\___ \ | |  | | |     / _ \ \___ \ 
+|  _  | |___| |_| |  _ < | | ___) || |  | | |___ / ___ \ ___) |
+|_| |_|_____|\___/|_| \_\___|____/ |_| |___\____/_/   \_\____/ 
+  
+*/
+
+// Primer encuentro
+double AIPlayer::Heuristica1(const Parchis &state, int player) const{
+    double score = 0;
+
+    for (int i = 0; i < 2; i++) {
+        double sign = ((i == player) ? 1 : -1);
+        // for c in colores
+        vector<color> colors = state.getPlayerColors(i);
+        for (color c : colors) {
+            score += sign * ContarDistancia(state, c);
+        }
+    }
+    return score;
+}
+
+// Segundo encuentro
+double AIPlayer::Heuristica2(const Parchis &state, color c, int player) const{
+    // Siguiendo un poco la jerarquia explicada en la memoria:
+    double color_score = 0;
+    // 65 de moverte hasta la entrada del pasillo
+    // final, + 8 casillas del pasillo + 1
+    const int max_distance = (65 +8 + 1);
+    
+    // Puntuaciones por cada acción
+    const double score_goal = 10000; // Llegar a la meta
+    const double score_corridor = 500; // Llegar al pasillo de la meta
+    const double score_eat = 200; // Comer una ficha enemiga / ser comido
+    const double score_barrier = 150; // Formar una barrera
+    const double score_safe = 100; // Llegar a una casilla segura
+    const double score_out = 50; // Sacar una ficha de casa
+    const double score_object = 25; // Coger un objeto del tablero
+
+    for (int j = 0; j < 2; j++) {
+        double sign = ((j == player) ? 1 : -1);
+        vector<color> colors = state.getPlayerColors(j);
+        for (color c : colors) {
+            double progress = (double) (max_distance - state.distanceToGoal(c,j));
+            bool is_safe = state.isSafePiece(c,j);
+            bool is_corridor = state.getBoard().getPiece(c,j).get_box().type == final_queue;
+            bool is_goal = state.getBoard().getPiece(c,j).get_box().type == goal;
+            bool is_home = state.getBoard().getPiece(c,j).get_box().type == home;
+
+            double multplier = max(1.,max(1.5*is_safe, 2.*(is_corridor or is_goal)));
+            color_score += pow(progress*multplier, 2.);
+            
+            // Comprobar si la ficha está en la meta
+            if (is_goal) {
+                color_score += score_goal;
+            }
+            
+            // Comprobar si la ficha está en el pasillo
+            if (is_corridor) {
+                color_score += score_corridor;
+            }
+            
+            // Comprobar si la ficha ha comido a una enemiga
+            if (state.isEatingMove()) {
+                color_score += score_eat;
+            }
+            
+            // Comprobar si la ficha ha formado una barrera
+            if (state.isWall(state.getBoard().getPiece(c,j).get_box()) == c or 
+                state.isMegaWall(state.getBoard().getPiece(c,j).get_box()) == c) {
+                color_score += score_barrier;
+            }
+            
+            // Comprobar si la ficha está en una casilla segura
+            if (is_safe) {
+                color_score += score_safe;
+            }
+            
+            // Comprobar si la ficha ha salido de casa
+            if (is_home) {
+                color_score += score_out;
+            }
+            
+            // Comprobar si la ficha ha cogido un objeto
+            if (state.itemAcquired()) {
+                color_score += score_object;
+            }
+            color_score *= sign;
+        }
+    }
+    return color_score;
+}
+
+// Tercer encuentro
 double AIPlayer::Heuristica3(const Parchis &estado, color c, int player) const{
 
 }
+
 
 /*
     _    _     ____   __  __ ___ _   _    ____  __    _    __  __

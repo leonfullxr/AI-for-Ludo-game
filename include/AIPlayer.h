@@ -95,6 +95,7 @@ class AIPlayer: public Player{
         | |  | || | ___) | | |  | | |___  | || |_| | |_| | |_| |___) |
         |_|  |_|___|____/  |_|  |_|_____| |_| \___/|____/ \___/|____/ 
         **/
+        // Primer Encuentro
         void thinkGreedy(color & c_piece,  int & id_piece, int & dice) const;
         double simpleHeuristicSingleColor(const Parchis &estado, color c) const;
         double Heuristica1(const Parchis &estado, int jugador) const;
@@ -121,6 +122,10 @@ class AIPlayer: public Player{
             RED = 38,
             GREEN = 55,
             YELLOW = 4,
+            LASTBLUEBOX = 17,
+            LASTREDBOX = 34,
+            LASTGREENBOX = 51,
+            LASTYELLOWBOX = 68,
         };
 };
 #endif
