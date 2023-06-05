@@ -460,8 +460,14 @@ bool AIPlayer::isVulnerablePiece(const Parchis &estado, const Piece &piece, int 
     int enemyId = (player + 1) % 2; // 0 o 1
     for (auto enemyColor : estado.getPlayerColors(enemyId)) {
         for (auto enemyPiece : estado.getBoard().getPieces(enemyColor)) {
-            for (auto enemyDice : estado.getAvailableNormalDices(enemyId)) {
-                if (!estado.isSafeBox(calculateBoxType(piece,0)) and enemyDistance(estado,player))
+            for (auto enemyDice : estado.getAvailableNormalDices(enemyId)) {    // Piezas normales
+                if (!estado.isSafeBox(calculateBoxType(piece,0)) and 
+                    clearPathBetweenTwoSquares(estado,calculateBoxType(enemyPiece,0),calculateBoxType(piece,0),enemyPiece)) {
+                        return true;
+                }
+            }
+            for (auto enemySpecialDice : estado.getAvailableSpecialDices(enemyId)) {    // Piezas especiales
+
             }
         }
     }    
@@ -513,10 +519,23 @@ double AIPlayer::enemyDistance(const Parchis &estado, int player) const {
 // siguiente turno una ficha nos podría comer fácilmente.
 bool AIPlayer::isBeneficialToLeaveHome(const Parchis &estado, const Piece &piece, int player) const {
     // Si una ficha en casa podría moverse a una casilla segura en el próximo turno
-    for (auto dice : estado.getAllAvailableDices(player)) {
+    for (auto dice : estado.getAvailableNormalDices(player)) {
         Box goalBox = calculateBoxType(piece,dice);
         if (estado.isSafeBox(goalBox) and clearPathBetweenTwoSquares(estado,piece.get_box(),goalBox,piece)) {
             return true;
+        }
+    }
+    for (auto specialDice : estado.getAvailableSpecialDices(player)) {
+        if (specialDice == bullet) {
+            Box goalBox = estado.computeMove(piece, specialDice, NULL); // TODO: comprobar que hay que pasa un NULL
+            if (estado.isSafeBox(goalBox) and clearPathBetweenTwoSquares(estado,piece.get_box(),goalBox,piece)) {
+                return true;
+            }
+        } else if (specialDice == mushroom) {
+            Box goalBox = estado.computeMove(piece, specialDice, NULL);
+            if (estado.isSafeBox(goalBox) and clearPathBetweenTwoSquares(estado,piece.get_box(),goalBox,piece)) {
+                return true;
+            }
         }
     }
     
