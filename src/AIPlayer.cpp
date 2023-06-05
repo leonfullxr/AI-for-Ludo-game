@@ -668,51 +668,54 @@ double AIPlayer::Heuristica2(const Parchis &state, color c, int player) const{
         double sign = ((j == player) ? 1 : -1);
         vector<color> colors = state.getPlayerColors(j);
         for (color c : colors) {
-            double progress = (double) (max_distance - state.distanceToGoal(c,j));
-            bool is_safe = state.isSafePiece(c,j);
-            bool is_corridor = state.getBoard().getPiece(c,j).get_box().type == final_queue;
-            bool is_goal = state.getBoard().getPiece(c,j).get_box().type == goal;
-            bool is_home = state.getBoard().getPiece(c,j).get_box().type == home;
+            for (int i = 0; i < num_pieces; i++) {
 
-            double multplier = max(1.,max(1.5*is_safe, 2.*(is_corridor or is_goal)));
-            color_score += pow(progress*multplier, 2.);
-            
-            // Comprobar si la ficha está en la meta
-            if (is_goal) {
-                color_score += score_goal;
+                double progress = (double) (max_distance - state.distanceToGoal(c,i));
+                bool is_safe = state.isSafePiece(c,i);
+                bool is_corridor = state.getBoard().getPiece(c,id).get_box().type == final_queue;
+                bool is_goal = state.getBoard().getPiece(c,i).get_box().type == goal;
+                bool is_home = isPieceInHome(state.getBoard().getPiece(c,i));
+
+                double multplier = max(1.,max(1.5*is_safe, 2.*(is_corridor or is_goal)));
+                color_score += pow(progress*multplier, 2.);
+                
+                // Comprobar si la ficha está en la meta
+                if (is_goal) {
+                    color_score += score_goal;
+                }
+                
+                // Comprobar si la ficha está en el pasillo
+                if (is_corridor) {
+                    color_score += score_corridor;
+                }
+                
+                // Comprobar si la ficha ha comido a una enemiga
+                if (state.isEatingMove()) {
+                    color_score += score_eat;
+                }
+                
+                // Comprobar si la ficha ha formado una barrera
+                if (state.isWall(state.getBoard().getPiece(c,i).get_box()) == c or 
+                    state.isMegaWall(state.getBoard().getPiece(c,i).get_box()) == c) {
+                    color_score += score_barrier;
+                }
+                
+                // Comprobar si la ficha está en una casilla segura
+                if (is_safe) {
+                    color_score += score_safe;
+                }
+                
+                // Comprobar si la ficha ha salido de casa
+                if (is_home) {
+                    color_score += score_out;
+                }
+                
+                // Comprobar si la ficha ha cogido un objeto en el ultimo turno
+                if (state.itemAcquired()) {
+                    color_score += score_object;
+                }
+                color_score *= sign;
             }
-            
-            // Comprobar si la ficha está en el pasillo
-            if (is_corridor) {
-                color_score += score_corridor;
-            }
-            
-            // Comprobar si la ficha ha comido a una enemiga
-            if (state.isEatingMove()) {
-                color_score += score_eat;
-            }
-            
-            // Comprobar si la ficha ha formado una barrera
-            if (state.isWall(state.getBoard().getPiece(c,j).get_box()) == c or 
-                state.isMegaWall(state.getBoard().getPiece(c,j).get_box()) == c) {
-                color_score += score_barrier;
-            }
-            
-            // Comprobar si la ficha está en una casilla segura
-            if (is_safe) {
-                color_score += score_safe;
-            }
-            
-            // Comprobar si la ficha ha salido de casa
-            if (is_home) {
-                color_score += score_out;
-            }
-            
-            // Comprobar si la ficha ha cogido un objeto
-            if (state.itemAcquired()) {
-                color_score += score_object;
-            }
-            color_score *= sign;
         }
     }
     return color_score;
