@@ -444,7 +444,17 @@ double AIPlayer::Heuristica2(const Parchis &state, color c, int player) const{
 }
 
 // Tercer Encuentro
-// TODO: falta por implementar
+<<<<<<< HEAD
+// TODO: Implementar
+bool AIPlayer::isVulnerable(color c, int player) const {
+    // Revisa todas las fichas enemigas
+    for (each enemy piece) {
+        // Si la ficha enemiga puede llegar a la ficha actual en el próximo turno
+        if (distance between enemy piece and this piece <= 6) { // 6 es el máximo valor de un dado
+            // Si la ficha no está en una casilla segura
+            if (!state.isSafePiece(c, player)) {
+                return true;
+=======
 bool AIPlayer::isVulnerable(const Parchis &estado, color c, int player) const {
     // // Revisa todas las fichas enemigas
     // for (each enemy piece) {
@@ -460,9 +470,10 @@ bool AIPlayer::isVulnerable(const Parchis &estado, color c, int player) const {
 }
 
 /**
- * @brief Calcula la distancia mas corta entre la fichas actuales del jugador y las fichas enemigas más cercanas
+ * @brief Calcula la distancia entre la ficha actual y la ficha enemiga más cercana
+ * 
  * @param estado estado actual del juego
- * @param c color del jugador no enemigo
+ * @param c 
  * @param player jugador actual no enemigo
  * @return double 
  */
@@ -471,26 +482,18 @@ double AIPlayer::enemyDistance(const Parchis &estado, color c, int player) const
     // Revisa todas las fichas del jugador enemigo
     int enemy = (player + 1) % 2;
     estado.getPlayerColors(enemy);
-    vector<Piece> fichas_jugador;   // Para guardar las fichas del jugador no enemigo
     
-    for (auto color : estado.getPlayerColors(player)) { // Itero sobre los colores del jugador no enemigo
-        for (auto piece : estado.getBoard().getPieces(color)) { // Itero sobre las fichas del jugador no enemigo
-            if (piece.get_box().num != 0)                       // Queremos que la ficha esté disponible
-                fichas_jugador.push_back(estado.getBoard().getPiece(color,piece.get_box().num)); // Voy guardando las fichas disponibles del jugador no enemigo
-        }
-    }
-    
-    for (auto enemyColor : estado.getPlayerColors(enemy)) {                 // Itero sobre los colores del jugador enemigo
-        for (auto enemyPiece : estado.getBoard().getPieces(enemyColor)) {   // Itero sobre las fichas de cada color del enemigo
-            for (auto playerPiece : fichas_jugador) {                       // Itero sobre las fichas del jugador no enemigo
-                if (enemyPiece.get_box().type == (home or normal) and
-                    playerPiece.get_type() == (home or normal)) {           // Si la ficha está en casa o en una casilla normal
-                    double distance = std::abs(playerPiece.get_box().num - enemyPiece.get_box().num);
-                    
-                    if (distance < min_distance) {
-                        min_distance = distance;
-                    }
+    for (auto color : estado.getPlayerColors(enemy)) { // Itero sobre los colores del jugador
+        for (auto piece : estado.getBoard().getPieces(color)) { // Itero sobre las fichas de cada color del enemigo
+            
+            if (piece.get_box().type == (home or normal) and
+                estado.getBoard().getPiece(c,).get_box().type == (home or normal)) {  // Si la ficha está en casa o en una casilla normal
+                double distance = std::abs(estado.getBoard().getPiece(c,).get_box().num - piece.get_box().num);
+                
+                if (distance < min_distance) {
+                    min_distance = distance;
                 }
+>>>>>>> 03ce0e0 (Merge)
             }
         }
     }
@@ -498,7 +501,20 @@ double AIPlayer::enemyDistance(const Parchis &estado, color c, int player) const
     return min_distance;
 }
 
-// TODO: falta por implementar
+<<<<<<< HEAD
+// TODO: Implementar
+bool AIPlayer::isBeneficialToLeaveHome(color c, int player) const {
+    // Implement your own logic here. For example, one basic strategy could be:
+    // Si todas las fichas están en casa o en la meta, es beneficioso sacar una de casa
+    if (all pieces are in home or goal) {
+        return true;
+    }
+    // Si una ficha en casa podría moverse a una casilla segura en el próximo turno
+    if (distance to nearest safe spot from home <= 6) { // 6 es el máximo valor de un dado
+        return true;
+    }
+    return false;
+=======
 bool AIPlayer::isBeneficialToLeaveHome(const Parchis &estado, color c, int player) const {
     // // Implement your own logic here. For example, one basic strategy could be:
     // // Si todas las fichas están en casa o en la meta, es beneficioso sacar una de casa
@@ -510,6 +526,7 @@ bool AIPlayer::isBeneficialToLeaveHome(const Parchis &estado, color c, int playe
     //     return true;
     // }
     // return false;
+>>>>>>> 03ce0e0 (Merge)
 }
 
 double AIPlayer::Heuristica3(const Parchis &estado, color c, int player) const{
