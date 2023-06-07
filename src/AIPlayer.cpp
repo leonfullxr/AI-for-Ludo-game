@@ -648,7 +648,7 @@ double AIPlayer::Heuristica1(const Parchis &state, int player) const{
 }
 
 // Segundo encuentro
-double AIPlayer::Heuristica2(const Parchis &state, color c, int player) const{
+double AIPlayer::Heuristica2(const Parchis &state, int player) const{
     // Siguiendo un poco la jerarquia explicada en la memoria:
     double color_score = 0;
     // 65 de moverte hasta la entrada del pasillo
@@ -760,10 +760,10 @@ ParchisBros children = actual->getChildren();
 
 double AIPlayer::minimax(Parchis &state, int depth, int player, color &best_piece, int &best_dice, bool maximizingPlayer) const {
     if (depth == 0 || state.gameOver())
-        return Heuristica2(state, best_piece, player); // Dependiendo de la Heuristica que escojamos
+        return Heuristica2(state, player); // Dependiendo de la Heuristica que escojamos
 
     if (maximizingPlayer) {
-        double maxEval = -std::numeric_limits<double>::infinity();
+        double maxEval = menosinf;
         ParchisBros children = state.getChildren();
         color tmp_piece;
         int tmp_dice;
@@ -778,7 +778,7 @@ double AIPlayer::minimax(Parchis &state, int depth, int player, color &best_piec
         }
         return maxEval;
     } else {
-        double minEval = std::numeric_limits<double>::infinity();
+        double minEval = masinf;
         ParchisBros children = state.getChildren();
         for (auto child = children.begin(); child != children.end(); ++child) {
             bool nextMaximizing = child.getMovedDiceValue() == 6 ? false : true;
@@ -803,10 +803,10 @@ double AIPlayer::minimax(Parchis &state, int depth, int player, color &best_piec
 */
 double AIPlayer::podaAlphaBeta(Parchis &state, int depth, int player, color &best_piece, int &best_dice, bool maximizingPlayer, double alpha, double beta) const {
     if (depth == 0 || state.gameOver())
-        return Heuristica2(state, best_piece, player);
+        return Heuristica2(state, player);
 
     if (maximizingPlayer) {
-        double maxEval = -std::numeric_limits<double>::infinity();
+        double maxEval = menosinf;
         ParchisBros children = state.getChildren();
         color tmp_piece;
         int tmp_dice;
@@ -824,7 +824,7 @@ double AIPlayer::podaAlphaBeta(Parchis &state, int depth, int player, color &bes
         }
         return maxEval;
     } else {
-        double minEval = std::numeric_limits<double>::infinity();
+        double minEval = masinf;
         ParchisBros children = state.getChildren();
         for (auto child = children.begin(); child != children.end(); ++child) {
             bool nextMaximizing = child.getMovedDiceValue() == 6 ? false : true;
