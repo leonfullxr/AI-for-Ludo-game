@@ -4,6 +4,10 @@
 # include "Attributes.h"
 # include "Player.h"
 
+// Necesito hacer esto porque el compilador no reconoce los objetos de la clase Piece, al no declararse
+// la clase Piece.h antes que AIPlayer.h
+class Piece;
+
 class AIPlayer: public Player{
     protected:
         //Id identificativo del jugador
@@ -98,7 +102,7 @@ class AIPlayer: public Player{
         // Primer Encuentro
         void thinkGreedy(color & c_piece,  int & id_piece, int & dice) const;
         double simpleHeuristicSingleColor(const Parchis &estado, color c) const;
-        double Heuristica1(const Parchis &estado, int jugador) const;
+        double Heuristic1(const Parchis &estado, int jugador) const;
         double ContarDistancia(const Parchis &estado, color c) const;
         // Segundo Encuentro
         double Heuristica2(const Parchis &estado, int player) const;
@@ -114,7 +118,7 @@ class AIPlayer: public Player{
         Box calculateBoxType(const Piece &piece, const int positionIncrement) const;
         bool pieceCanBeEatenByRedShell(const Parchis &state, const Piece &piece, int enemyPlayer, const Piece &targetPiece) const;
         bool pieceCanBeEatenByBlueShell(const Parchis &state, const Piece &piece, int enemyPlayer, const Piece &targetPiece) const;
-        double podaAlphaBeta(Parchis &state, int depth, int player, color &best_piece, int &best_dice, bool maximizingPlayer, double alpha, double beta) const;
+        double podaAlphaBeta(const Parchis *state, int depth, int player, color &best_piece, int &best_piece_id, int &best_dice, bool maximizingPlayer, double alpha, double beta, double(*heuristica)(const Parchis&,int)) const;
 
     private:
         enum ColorCasa{

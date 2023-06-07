@@ -69,6 +69,8 @@ void AIPlayer::think(color & c_piece, int & id_piece, int & dice) const{
         case 4:
             thinkMejorOpcionUsandoEspeciales(c_piece, id_piece, dice);
             break;
+        case 5:
+            cout << "Valor MiniMax" << podaAlphaBeta(actual,PROFUNDIDAD_ALFABETA,0,c_piece,id_piece,dice,true,menosinf,masinf, ValoracionTest);
     }
 }
 
@@ -365,7 +367,7 @@ void AIPlayer::thinkGreedy(color &c_piece, int &id_piece, int &dice) const{
 
     for (auto it = children.begin(); it != children.end(); ++it) {
         Parchis next_child = *it;
-        double score = Heuristica1(next_child, this->jugador);
+        double score = Heuristic1(next_child, this->jugador);
         if (score > best_score) {
             best_score = score;
             c_piece = it.getMovedColor();
@@ -633,7 +635,7 @@ bool AIPlayer::pieceCanBeEatenByBlueShell(const Parchis &state, const Piece &pie
 */
 
 // Primer encuentro
-double AIPlayer::Heuristica1(const Parchis &state, int player) const{
+double AIPlayer::Heuristic1(const Parchis &state, int player) const{
     double score = 0;
 
     for (int i = 0; i < 2; i++) {
@@ -748,7 +750,7 @@ ParchisBros children = actual->getChildren();
         for (auto it2 = grandchildren.begin(); it2 != grandchildren.end(); ++it2) {
             De forma recursiva puedo ir devolviendo la mejor/peor solucion de los hijos dependiendo de si estoy en nodo max/min
         }
-        double score = Heuristica1(next_child, this->jugador);
+        double score = Heuristic1(next_child, this->jugador);
         if (score > best_score) {
             best_score = score;
             c_piece = it.getMovedColor();
@@ -801,22 +803,28 @@ double AIPlayer::minimax(Parchis &state, int depth, int player, color &best_piec
 /_/   \_\_____|_|   |_| |_/_/   \_\ |____/|_____| |_/_/   \_\
 
 */
-double AIPlayer::podaAlphaBeta(Parchis &state, int depth, int player, color &best_piece, int &best_dice, bool maximizingPlayer, double alpha, double beta) const {
-    if (depth == 0 || state.gameOver())
-        return Heuristica2(state, player);
+double AIPlayer::podaAlphaBeta(const Parchis *state, int depth, int player, color &best_piece, int &best_piece_id, 
+                               int &best_dice, bool maximizingPlayer, double alpha, double beta,
+                               double(*heuristica)(const Parchis&,int)) const {
+    if((*state).gameOver()){
+        if((*state).getWinner() == player) return gana;
+        else return pierde;
+    }
+    if (depth == 0)
+        return Heuristica2(*state, player);
 
+    ParchisBros children = (*state).getChildren();
     if (maximizingPlayer) {
         double maxEval = menosinf;
-        ParchisBros children = state.getChildren();
-        color tmp_piece;
-        int tmp_dice;
+        color tmp_piece = none;
+        int tmp_dice = -1, tmp_piece_id = -1;
         for (auto child = children.begin(); child != children.end(); ++child) {
-            bool nextMaximizing = child.getMovedDiceValue() == 6 ? true : false;
-            double eval = podaAlphaBeta(*child, depth - 1, player, tmp_piece, tmp_dice, nextMaximizing, alpha, beta);
+            double eval = podaAlphaBeta(&(*child), depth - 1, player, tmp_piece, tmp_piece_id, tmp_dice, false, alpha, beta, heuristica);
             if (eval > maxEval) {
                 maxEval = eval;
                 best_piece = child.getMovedColor();
                 best_dice = child.getMovedDiceValue();
+                best_piece_id = child.getMovedPieceId();
             }
             alpha = std::max(alpha, eval);
             if (beta <= alpha) // Poda Beta
@@ -825,14 +833,10 @@ double AIPlayer::podaAlphaBeta(Parchis &state, int depth, int player, color &bes
         return maxEval;
     } else {
         double minEval = masinf;
-        ParchisBros children = state.getChildren();
         for (auto child = children.begin(); child != children.end(); ++child) {
-            bool nextMaximizing = child.getMovedDiceValue() == 6 ? false : true;
-            double eval = podaAlphaBeta(*child, depth - 1, player, best_piece, best_dice, nextMaximizing, alpha, beta);
+            double eval = podaAlphaBeta(&(*child), depth - 1, player, best_piece, best_piece_id, best_dice, true, alpha, beta, heuristica);
             if (eval < minEval) {
                 minEval = eval;
-                best_piece = child.getMovedColor();
-                best_dice = child.getMovedDiceValue();
             }
             beta = std::min(beta, eval);
             if (beta <= alpha) // Poda Alpha

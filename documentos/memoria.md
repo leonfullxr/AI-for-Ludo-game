@@ -266,7 +266,7 @@ function minimax(position, depth, alpha, beta, maximizinPlayer)
 		return minEval;
 ```
 
-# Encuentro Cuarto
+# Encuentro Cuarto y Final
 ## Observaciones
 Al ver la heurística jugar varias partidas, me estoy dando cuenta de algo **fundamental**, y es que, si tengo una ficha de color azul a 20 de **distancia** para ganar, pero tengo 3 fichas de color verde a 7 de distancia para ganar, la heurística se lo toma de la misma manera que si hay una ficha de color azul a 20 casillas de ganar la partida y 3 fichas de color verde en casa, y no estoy muy seguro de por qué, no obstante, es algo que tengo que modificar para poder ganarle al ninja 3. 
 
@@ -275,3 +275,26 @@ La heurística anterior (heuristica 3) le asigna valores subjetivos a los objeto
 No obstante, por las partidas que estoy jugando sin tener en cuenta los objetos, tampoco va tan mal, sino que creo que el jugo de la practica está en lo que he comentado anteriormente sobre las **distancias**. Tambien, he de tener en cuenta y admitir que he buscado informacion acerca de estos juegos sobre distancias, y aunque hayan objetos, caminos distintos, variedades, etc lo imprescindible para analizar la situacion del tablero de la partida, o del estado del juego es lo cerca que estás de ganar, al fin y al cabo, **si mi rival es un deportista de atleta y yo un simple campesino, si a mi me ponen a 1cm de la meta y a él a 1metro, voy a ganar debido a las distancias, independientemente si mi rival me podría superar en las mismas condiciones de distancia**, entonces creo que la clave del éxito está ahí. Además mi teoría se refuerza con el hecho de que los ****objetos** solamente pueden ser escogidos y usados una unica vez, por tanto, **son** una **herramienta** para ganar, pero realmente no hay que hacerle mucho incapié.
 
 Por tanto, creo que la clave está en ir asignando valores subjetivos para ponderar los datos e ir probando las partidas para ver cual es el que tiene mas exito, entonces la idea es la **clave** pero lo que va a hacer ganar la mayoría de veces son las **constantes** que voy modificando para adaptarlos al mejor juego posible.
+
+## Heuristica
+Con lo descrito anteriormente, he hecho varias modificaciones que voy a resaltar a continuacion:
+* Enfocar mas el problema a las distancias que a los objetos, pienso que los objetos son una **herramienta** para ganar pero no condicion necesaria como viene a ser las distancias a la meta
+* Sinopsis entre objetos, por ejemplo:
+    * El **rival** posee **caparazon** azul o rojo, por tanto un buen tablero debe de contener a la **bocina** para bloquear el ataque e impedir que el enemigo avance junto con que elimine la/s ficha/s con la que interactue el caparazon
+    * Si el rival contiene **barreras**, calcular si es necesario que mis fichas tengan que pasar por el puede ser un tanto tedioso, por eso simplemente añadiré algunos puntos extra por tener el objeto fantasma, que me permite sobrepasar barreras, junto con la bala
+
+El codigo final seria el siguiente:
+```java
+//TODO: codigo
+```
+
+## Implementación Poda Alfa-Beta
+He mejorado levemente el codigo, porque como se puede apreciar en el pseudocodigo implementado con anterioridad, hay algunos posibles problemas que he podido percatar:
+* La referencia a best_piece y best_dice en los nodos no máximos: Se están asignando los valores de best_piece y best_dice en cada nodo, incluso en aquellos nodos que no son máximos (es decir, aquellos nodos que están minimizando). En el algoritmo de minimax con poda alfa-beta, solo debería registrar los movimientos en los nodos de maximización, porque esos son los movimientos que el jugador de IA realmente hará.
+* La referencia a tmp_piece y tmp_dice: Tengo una referencia a las variables tmp_piece y tmp_dice que no parecen estar utilizadas correctamente. Las he pasado a la función recursiva pero no estoy usando los valores resultantes.
+* El uso de la variable nextMaximizing: Estoy determinando si el siguiente jugador es maximizador en función del valor del dado. El problema que no habia tenido en cuenta, era que el dado puede ser un 6, o un 10 o 20, etc. Por tanto, deberia fijarme si en el nivel en el que estoy, es del jugador oponente o el mio.
+
+Ahora, la funcion es correcta y da buenos resultados, he aqui el codigo:
+```java
+//TODO: codigo
+```
