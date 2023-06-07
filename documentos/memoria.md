@@ -296,5 +296,46 @@ He mejorado levemente el codigo, porque como se puede apreciar en el pseudocodig
 
 Ahora, la funcion es correcta y da buenos resultados, he aqui el codigo:
 ```java
-//TODO: codigo
+double AIPlayer::podaAlphaBeta(const Parchis *state, int depth, int player, color &best_piece, int &best_piece_id, 
+                               int &best_dice, bool maximizingPlayer, double alpha, double beta,
+                               double(*heuristica)(const Parchis&,int)) const {
+    if((*state).gameOver()){
+        if((*state).getWinner() == player) return gana;
+        else return pierde;
+    }
+    if (depth == 0)
+        return Heuristica2(*state, player);
+
+    ParchisBros children = (*state).getChildren();
+    if (maximizingPlayer) {
+        double maxEval = menosinf;
+        color tmp_piece = none;
+        int tmp_dice = -1, tmp_piece_id = -1;
+        for (auto child = children.begin(); child != children.end(); ++child) {
+            double eval = podaAlphaBeta(&(*child), depth - 1, player, tmp_piece, tmp_piece_id, tmp_dice, false, alpha, beta, heuristica);
+            if (eval > maxEval) {
+                maxEval = eval;
+                best_piece = child.getMovedColor();
+                best_dice = child.getMovedDiceValue();
+                best_piece_id = child.getMovedPieceId();
+            }
+            alpha = std::max(alpha, eval);
+            if (beta <= alpha) // Poda Beta
+                break;
+        }
+        return maxEval;
+    } else {
+        double minEval = masinf;
+        for (auto child = children.begin(); child != children.end(); ++child) {
+            double eval = podaAlphaBeta(&(*child), depth - 1, player, best_piece, best_piece_id, best_dice, true, alpha, beta, heuristica);
+            if (eval < minEval) {
+                minEval = eval;
+            }
+            beta = std::min(beta, eval);
+            if (beta <= alpha) // Poda Alpha
+                break;
+        }
+        return minEval;
+    }
+}
 ```
