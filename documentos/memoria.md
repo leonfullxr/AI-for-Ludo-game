@@ -132,6 +132,44 @@ function minimax(position, depth, maximizingPlayer)
             minEval = min(minEval,eval)
         return minEval
     
+### Codigo completo
+```java
+double AIPlayer::minimax(Parchis &state, int depth, int player, color &best_piece, int &best_piece_id, int &best_dice, bool maximizingPlayer,
+                         double(*heuristica)(const Parchis&,int)) const {
+    if(state.gameOver()){
+        if(state.getWinner() == player) return gana;
+        else return pierde;
+    }
+    if (depth == 0)
+        return heuristica(state, player);
+
+    ParchisBros children = state.getChildren();
+    if (maximizingPlayer) {
+        double maxEval = menosinf;
+        color tmp_piece = none;
+        int tmp_dice = -1, tmp_piece_id = -1;
+        for (auto child = children.begin(); child != children.end(); ++child) {
+            double eval = minimax(*child, depth - 1, player, tmp_piece, tmp_piece_id, tmp_dice, false, heuristica);
+            if (eval > maxEval) {
+                maxEval = eval;
+                best_piece = child.getMovedColor();
+                best_dice = child.getMovedDiceValue();
+                best_piece_id = child.getMovedPieceId();
+            }
+        }
+        return maxEval;
+    } else {
+        double minEval = masinf;
+        for (auto child = children.begin(); child != children.end(); ++child) {
+            double eval = minimax(*child, depth - 1, player, best_piece, best_piece_id, best_dice, true, heuristica);
+            if (eval < minEval) {
+                minEval = eval;
+            }
+        }
+        return minEval;
+    }
+}
+```
 // initial call 
 minimax(currentPosition, PROFUNDIDAD_MINIMAX, true)
 ```

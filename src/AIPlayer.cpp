@@ -71,6 +71,8 @@ void AIPlayer::think(color & c_piece, int & id_piece, int & dice) const{
             break;
         case 5:
             cout << "Valor MiniMax" << podaAlphaBeta(actual,PROFUNDIDAD_ALFABETA,0,c_piece,id_piece,dice,true,menosinf,masinf, ValoracionTest);
+        case 6:
+            podaAlphaBeta(actual,PROFUNDIDAD_ALFABETA,0,c_piece,id_piece,dice,true,menosinf,masinf, Heuristica2);
     }
 }
 
@@ -650,7 +652,7 @@ double AIPlayer::Heuristic1(const Parchis &state, int player) const{
 }
 
 // Segundo encuentro
-double AIPlayer::Heuristica2(const Parchis &state, int player) const{
+double AIPlayer::Heuristica2(const Parchis &state, int player) {
     // Siguiendo un poco la jerarquia explicada en la memoria:
     double color_score = 0;
     // 65 de moverte hasta la entrada del pasillo
@@ -760,40 +762,42 @@ ParchisBros children = actual->getChildren();
     }
 */
 
-double AIPlayer::minimax(Parchis &state, int depth, int player, color &best_piece, int &best_dice, bool maximizingPlayer) const {
-    if (depth == 0 || state.gameOver())
-        return Heuristica2(state, player); // Dependiendo de la Heuristica que escojamos
+double AIPlayer::minimax(Parchis &state, int depth, int player, color &best_piece, int &best_piece_id, int &best_dice, bool maximizingPlayer,
+                         double(*heuristica)(const Parchis&,int)) const {
+    if(state.gameOver()){
+        if(state.getWinner() == player) return gana;
+        else return pierde;
+    }
+    if (depth == 0)
+        return heuristica(state, player);
 
+    ParchisBros children = state.getChildren();
     if (maximizingPlayer) {
         double maxEval = menosinf;
-        ParchisBros children = state.getChildren();
-        color tmp_piece;
-        int tmp_dice;
+        color tmp_piece = none;
+        int tmp_dice = -1, tmp_piece_id = -1;
         for (auto child = children.begin(); child != children.end(); ++child) {
-            bool nextMaximizing = child.getMovedDiceValue() == 6 ? true : false;
-            double eval = minimax(*child, depth - 1, player, tmp_piece, tmp_dice, nextMaximizing);
+            double eval = minimax(*child, depth - 1, player, tmp_piece, tmp_piece_id, tmp_dice, false, heuristica);
             if (eval > maxEval) {
                 maxEval = eval;
                 best_piece = child.getMovedColor();
                 best_dice = child.getMovedDiceValue();
+                best_piece_id = child.getMovedPieceId();
             }
         }
         return maxEval;
     } else {
         double minEval = masinf;
-        ParchisBros children = state.getChildren();
         for (auto child = children.begin(); child != children.end(); ++child) {
-            bool nextMaximizing = child.getMovedDiceValue() == 6 ? false : true;
-            double eval = minimax(*child, depth - 1, player, best_piece, best_dice, nextMaximizing);
+            double eval = minimax(*child, depth - 1, player, best_piece, best_piece_id, best_dice, true, heuristica);
             if (eval < minEval) {
                 minEval = eval;
-                best_piece = child.getMovedColor();
-                best_dice = child.getMovedDiceValue();
             }
         }
         return minEval;
     }
 }
+
 
 /*
     _    _     ____  _   _    _      ____  _____ _____  _    
@@ -811,7 +815,7 @@ double AIPlayer::podaAlphaBeta(const Parchis *state, int depth, int player, colo
         else return pierde;
     }
     if (depth == 0)
-        return Heuristica2(*state, player);
+        return heuristica(*state, player);
 
     ParchisBros children = (*state).getChildren();
     if (maximizingPlayer) {

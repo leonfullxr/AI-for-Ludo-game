@@ -105,8 +105,9 @@ class AIPlayer: public Player{
         double Heuristic1(const Parchis &estado, int jugador) const;
         double ContarDistancia(const Parchis &estado, color c) const;
         // Segundo Encuentro
-        double Heuristica2(const Parchis &estado, int player) const;
-        double minimax(Parchis &state, int depth, int player, color &best_piece, int &best_dice, bool maximizingPlayer) const;
+        double Heuristica2(const Parchis &estado, int player);
+        double minimax(Parchis &state, int depth, int player, color &best_piece, int &best_piece_id, int &best_dice, bool maximizingPlayer,
+                         double(*heuristica)(const Parchis&,int)) const;
         // Tercer Encuentro
         double Heuristica3(const Parchis &estado, color c, int player) const;
         bool isVulnerablePiece(const Parchis &estado, const Piece &piece, int player) const;
