@@ -73,6 +73,9 @@ void AIPlayer::think(color & c_piece, int & id_piece, int & dice) const{
             cout << "Valor MiniMax" << podaAlphaBeta(actual,PROFUNDIDAD_ALFABETA,0,c_piece,id_piece,dice,true,menosinf,masinf, ValoracionTest);
         case 6:
             podaAlphaBeta(actual,PROFUNDIDAD_ALFABETA,0,c_piece,id_piece,dice,true,menosinf,masinf, Heuristica2);
+        case 7:
+            podaAlphaBeta(actual,PROFUNDIDAD_ALFABETA,0,c_piece,id_piece,dice,true,menosinf,masinf, Heuristica4);
+
     }
 }
 
@@ -627,6 +630,34 @@ bool AIPlayer::pieceCanBeEatenByBlueShell(const Parchis &state, const Piece &pie
     return targetPiece.get_box().num == closestPiece.get_box().num;
 }
 
+double AIPlayer::evaluateItems(const Parchis& state, const int player) const{
+    double item_score = 0;
+    
+    for (auto item : state.getAvailableSpecialDices(player)) {
+        if (item == banana) {
+            item_score += 50;
+        } else if (item == mushroom) {
+            item_score += 70;
+        } else if (item == red_shell) {
+            item_score += 80;
+        } else if (item == blue_shell) {
+            item_score += 100;
+        } else if (item == horn) {
+            item_score += 100;
+        } else if (item == bullet) {
+            item_score += 120;
+        } else if (item == shock) {
+            item_score += 40;
+        } else if (item == star) {
+            item_score += 100;
+        } else if (item == mega_mushroom) {
+            item_score += 80;
+        }
+    }
+    
+    return item_score/2;
+}
+
 /*
  _   _ _____ _   _ ____  ___ ____ _____ ___ ____    _    ____  
 | | | | ____| | | |  _ \|_ _/ ___|_   _|_ _/ ___|  / \  / ___| 
@@ -654,19 +685,19 @@ double AIPlayer::Heuristic1(const Parchis &state, int player) const{
 // Segundo encuentro
 double AIPlayer::Heuristica2(const Parchis &state, int player) {
     // Siguiendo un poco la jerarquia explicada en la memoria:
-    double color_score = 0;
+    double color_score = 0, total = 0;
     // 65 de moverte hasta la entrada del pasillo
     // final, + 8 casillas del pasillo + 1
     const int max_distance = (65 +8 + 1);
     
     // Puntuaciones por cada acción
-    const double score_goal = 10000; // Llegar a la meta
-    const double score_corridor = 500; // Llegar al pasillo de la meta
-    const double score_eat = 200; // Comer una ficha enemiga / ser comido
-    const double score_barrier = 150; // Formar una barrera
-    const double score_safe = 100; // Llegar a una casilla segura
-    const double score_out = 50; // Sacar una ficha de casa
-    const double score_object = 25; // Coger un objeto del tablero
+    const double score_goal = 150; // Llegar a la meta
+    const double score_corridor = 50; // Llegar al pasillo de la meta
+    const double score_eat = 20; // Comer una ficha enemiga / ser comido
+    const double score_barrier = 15; // Formar una barrera
+    const double score_safe = 10; // Llegar a una casilla segura
+    const double score_out = 5; // Sacar una ficha de casa
+    const double score_object = 2.5; // Coger un objeto del tablero
 
     for (int j = 0; j < 2; j++) {
         double sign = ((j == player) ? 1 : -1);
@@ -676,12 +707,12 @@ double AIPlayer::Heuristica2(const Parchis &state, int player) {
 
                 double progress = (double) (max_distance - state.distanceToGoal(c,i));
                 bool is_safe = state.isSafePiece(c,i);
-                bool is_corridor = state.getBoard().getPiece(c,id).get_box().type == final_queue;
+                bool is_corridor = state.getBoard().getPiece(c,i).get_box().type == final_queue;
                 bool is_goal = state.getBoard().getPiece(c,i).get_box().type == goal;
-                bool is_home = isPieceInHome(state.getBoard().getPiece(c,i));
+                bool is_home = state.getBoard().getPiece(c,i).get_box().type == home;
 
                 double multplier = max(1.,max(1.5*is_safe, 2.*(is_corridor or is_goal)));
-                color_score += pow(progress*multplier, 2.);
+                color_score += progress*multplier;
                 
                 // Comprobar si la ficha está en la meta
                 if (is_goal) {
@@ -708,28 +739,124 @@ double AIPlayer::Heuristica2(const Parchis &state, int player) {
                 if (is_safe) {
                     color_score += score_safe;
                 }
-                
-                // Comprobar si la ficha ha salido de casa
+
                 if (is_home) {
-                    color_score += score_out;
+                    color_score -= 5;
                 }
                 
                 // Comprobar si la ficha ha cogido un objeto en el ultimo turno
                 if (state.itemAcquired()) {
                     color_score += score_object;
                 }
-                color_score *= sign;
             }
         }
+            color_score *= sign;
+            total += color_score;
+            color_score = 0;
     }
-    return color_score;
+    return total;
 }
 
 // Tercer encuentro
-double AIPlayer::Heuristica3(const Parchis &estado, color c, int player) const{
+double AIPlayer::Heuristica3(const Parchis &state, int player) {
+    double color_score = 0;
+    const int max_distance = (65 + 8 + 1);
+    
+    const double score_goal = 10000;
+    const double score_corridor = 500;
+    const double score_eat = 200;
+    const double score_barrier = 150;
+    const double score_safe = 100;
+    const double score_out = 50;
+    const double score_object = 25;
+    
+    for (int j = 0; j < 2; j++) {
+        double sign = ((j == player) ? 1 : -1);
+        vector<color> colors = state.getPlayerColors(j);
+        
+        for (color c : colors) {
+            for (int i = 0; i < num_pieces; i++) {
+                double progress = (double)(max_distance - state.distanceToGoal(c, i));
+                bool is_safe = state.isSafePiece(c, i);
+                bool is_corridor = state.getBoard().getPiece(c, i).get_box().type == final_queue;
+                bool is_goal = state.getBoard().getPiece(c, i).get_box().type == goal;
 
+                double multiplier = max(1.0, max(1.5 * is_safe, 2.0 * (is_corridor || is_goal)));
+                color_score += pow(progress * multiplier, 2.0);
+
+                // No me interesa tener a fichas en casa
+                if (is_goal) {
+                    color_score -= score_goal;
+                }
+
+                if (is_corridor) {
+                    color_score += score_corridor;
+                }
+
+                if (state.isEatingMove()) {
+                    color_score += score_eat;
+                }
+
+                if (state.isWall(state.getBoard().getPiece(c, i).get_box()) == c ||
+                    state.isMegaWall(state.getBoard().getPiece(c, i).get_box()) == c) {
+                    color_score += score_barrier;
+                }
+
+                if (is_safe) {
+                    color_score += score_safe;
+                }
+
+                if (state.getAvailableSpecialDices(j).size() > 1) {
+                    color_score += evaluateItems(state, j);
+                }
+
+                color_score = color_score + sign*color_score;
+            }
+        }
+    }
+    
+    return color_score;
 }
 
+
+double AIPlayer::Heuristica4(const Parchis &state, int player){
+    int enemy_player = (player+1)%2;
+    vector<int> distances;
+
+    for (auto color : state.getPlayerColors(player)) {
+        int sum = 0;
+        int piece_id = 0;
+        for (auto piece : state.getBoard().getPieces(color)) {
+            sum += state.distanceToGoal(color, piece_id);
+            if (piece.get_box().type == home)   sum += 5;
+            piece_id++;
+        }
+        distances.push_back(sum);
+    }
+
+    int min_player = min(distances[0],distances[1]);
+    int max_player = max(distances[0],distances[1]);
+    int sum_player = min_player + 0.3*max_player;
+    distances.clear();
+
+    for (auto enemyColor : state.getPlayerColors(enemy_player)) {
+        int sum = 0;
+        int piece_id = 0;
+        for (auto piece : state.getBoard().getPieces(enemyColor)) {
+            sum += state.distanceToGoal(enemyColor, piece_id);
+            if (piece.get_box().type == home)   sum += 5;
+            piece_id++;
+        }
+        distances.push_back(sum);
+    }
+
+    int min_enemy = min(distances[0],distances[1]);
+    int max_enemy = max(distances[0],distances[1]);
+    int sum_enemy = min_enemy + 0.3*max_enemy;
+
+    if (player == 0) return sum_enemy - sum_player;
+    else return sum_player - sum_enemy;
+}
 
 /*
     _    _     ____   __  __ ___ _   _    ____  __    _    __  __
@@ -807,7 +934,7 @@ double AIPlayer::minimax(Parchis &state, int depth, int player, color &best_piec
 /_/   \_\_____|_|   |_| |_/_/   \_\ |____/|_____| |_/_/   \_\
 
 */
-double AIPlayer::podaAlphaBeta(const Parchis *state, int depth, int player, color &best_piece, int &best_piece_id, 
+double AIPlayer::podaAlphaBeta(const Parchis *state,const int depth, const int player, color &best_piece, int &best_piece_id, 
                                int &best_dice, bool maximizingPlayer, double alpha, double beta,
                                double(*heuristica)(const Parchis&,int)) const {
     if((*state).gameOver()){
@@ -848,4 +975,58 @@ double AIPlayer::podaAlphaBeta(const Parchis *state, int depth, int player, colo
         }
         return minEval;
     }
+}
+
+double AIPlayer::podaAlfaBeta(const Parchis *actual, const int max_prof, 
+                              color &c_piece, int &id_piece, int &dice, 
+                              double(*heuristica)(const Parchis&,int)) const {
+    double alpha = menosinf, beta = masinf;
+
+    ParchisBros children = actual->getChildren();
+    ParchisBros::Iterator it = children.begin();
+
+    while (it != children.end() and alpha < gana) {
+        double valHijo = podaAlfaBeta(&(*it), actual->getCurrentPlayerId(), 1, 
+                                        max_prof, alpha, beta, heuristica);
+        
+        if (valHijo > alpha) {
+            alpha = valHijo;
+            c_piece = it.getMovedColor();
+            id_piece = it.getMovedPieceId();
+            dice = it.getMovedDiceValue();
+        }
+        ++it;
+    }
+    return alpha;
+}
+
+double AIPlayer::podaAlfaBeta(const Parchis *actual, const int JUG_ALPHA, const int PROF_ACTUAL,
+                              const int PROF_MAX, double alpha, double beta,
+                              double(*heuristica)(const Parchis&,int)) const{
+    if (actual->gameOver()) {
+        if (actual->getWinner() == JUG_ALPHA)   return gana;
+        else return pierde;
+    }
+
+    if (PROF_ACTUAL == PROF_MAX)    return heuristica(*actual,JUG_ALPHA);
+
+    bool nodo_alpha = actual->getCurrentPlayerId() == JUG_ALPHA;
+    double &cambiando = nodo_alpha ? alpha : beta;
+    double (*seleccionar)(double, double);
+    if (nodo_alpha) {
+        seleccionar = [](double a, double b) {return max(a,b);};
+    } else {
+        seleccionar = [](double a, double b) {return min(a,b);};
+    }
+
+    ParchisBros children = actual->getChildren();
+    ParchisBros::Iterator it = children.begin();
+
+    while (alpha < beta and it != children.end()) {
+        double valHijo = podaAlfaBeta(&(*actual), JUG_ALPHA, PROF_ACTUAL+1, PROF_MAX, alpha, beta, heuristica);
+
+        cambiando = seleccionar(cambiando, valHijo);
+        ++it;
+    }
+    return cambiando;
 }

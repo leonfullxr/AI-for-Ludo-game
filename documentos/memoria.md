@@ -320,6 +320,7 @@ Con lo descrito anteriormente, he hecho varias modificaciones que voy a resaltar
 * Sinopsis entre objetos, por ejemplo:
     * El **rival** posee **caparazon** azul o rojo, por tanto un buen tablero debe de contener a la **bocina** para bloquear el ataque e impedir que el enemigo avance junto con que elimine la/s ficha/s con la que interactue el caparazon
     * Si el rival contiene **barreras**, calcular si es necesario que mis fichas tengan que pasar por el puede ser un tanto tedioso, por eso simplemente añadiré algunos puntos extra por tener el objeto fantasma, que me permite sobrepasar barreras, junto con la bala
+* Añadir la condicion de si hay fichas en casa, es peor, algo sencillo de entender pero que no habia tenido en cuenta anteriormente.
 
 El codigo final seria el siguiente:
 ```java
