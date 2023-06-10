@@ -197,8 +197,6 @@ Hay muchas otras formas de mejorar la heurística. Estas son solo algunas ideas 
 ```java
 funcion Heuristica3() {
     // todo lo mismo que en la Heuristica2 pero añadiendo lo siguiente
-    if (jugador gana)   return +inf;
-    if (jugador pierde) return -inf;
     // ...
     const double score_vulnerable = -500; // Ser vulnerable a ser comido
     const double score_enemy_near = 300; // Un enemigo está cerca y puede ser comido
@@ -306,6 +304,8 @@ function minimax(position, depth, alpha, beta, maximizinPlayer)
 
 # Encuentro Cuarto y Final
 ## Observaciones
+Con las implementaciones anteriores, he llegado al verdadero fracaso, es por ello, que voy a implementar una heuristica desde 0 para al menos intentar ganarle a los dos primeros ninjas, ya que me estoy quedando sin tiempo y tengo bastantes examenes por delante.
+
 Al ver la heurística jugar varias partidas, me estoy dando cuenta de algo **fundamental**, y es que, si tengo una ficha de color azul a 20 de **distancia** para ganar, pero tengo 3 fichas de color verde a 7 de distancia para ganar, la heurística se lo toma de la misma manera que si hay una ficha de color azul a 20 casillas de ganar la partida y 3 fichas de color verde en casa, y no estoy muy seguro de por qué, no obstante, es algo que tengo que modificar para poder ganarle al ninja 3. 
 
 La heurística anterior (heuristica 3) le asigna valores subjetivos a los objetos, algo que no está del todo mal, pero voy a intentar configurarlo de manera que se puedan 'equilibrar' las ponderaciones de los objetos, me refiero a que por ejemplo, si el rival tiene un caparazón azul, mi 'counterplay' sería tener la bocina, para evitar el ataque, además de evitar que el rival avance tantas casillas como se le asigne por comerme a una o dos fichas (dependiendo de si mis fichas están formando una barrera, pueden ser golpeados ambos, algo MUY malo para mi).
@@ -319,12 +319,91 @@ Con lo descrito anteriormente, he hecho varias modificaciones que voy a resaltar
 * Enfocar mas el problema a las distancias que a los objetos, pienso que los objetos son una **herramienta** para ganar pero no condicion necesaria como viene a ser las distancias a la meta
 * Sinopsis entre objetos, por ejemplo:
     * El **rival** posee **caparazon** azul o rojo, por tanto un buen tablero debe de contener a la **bocina** para bloquear el ataque e impedir que el enemigo avance junto con que elimine la/s ficha/s con la que interactue el caparazon
-    * Si el rival contiene **barreras**, calcular si es necesario que mis fichas tengan que pasar por el puede ser un tanto tedioso, por eso simplemente añadiré algunos puntos extra por tener el objeto fantasma, que me permite sobrepasar barreras, junto con la bala
+    * Solamente he considerado los objetos que proporcionan distancias, es decir, la bala, la seta, los caparazones (porque eliminan fichas enemigas), y les he asignado valores cerca de lo que proporcionan en distancia, es decir, como la bala suma 45 casillas, pues le he asignado un valor de 40, para la seta igual, suma minimo 8, por tanto le asigno un valor de 6. Esto ha incrementado mucho la mejora del bot.
+
 * Añadir la condicion de si hay fichas en casa, es peor, algo sencillo de entender pero que no habia tenido en cuenta anteriormente.
+* Siempre intentar valorar que mis fichas esten en el tablero, esto es algo que va enlazado con las distancias.
+
+Yo creo que la clave ha sido lo siguiente:
+* Al considerar las distancias, el mejor caso es cuando yo tengo una distancia pequeña y mi enemigo una distancia grande, pero al realizar la Poda Alfa Beta, se van a escoger tableros donde el valor de la heurística sea lo más grande posible, esto se traduce en que tanto mi rival como yo tengamos distancias grandes, algo que evidentemente no se quiere, por tanto, despues de echar un buen rato pensando, se me ha ocurrido hacer:
+    * Para cada jugador
+        * Para cada color, recorrer todas las fichas del mismo y sumar la distancia de cada ficha hacia el objetivo, como queremos que nuestras fichas esten lo mas cerca posible de la meta, lo guardo en una variable que vaya sumando el conjunto de distancias de las fichas de cada color.
+        * Compruebo si las fichas están en casillas seguras, si estan en el tablero, etc.. Esto lo he tomado de la heuristica ValoracionTest
+
+Con todo esto, devuelvo la distancia de mis fichas en negativo, teniendo en cuenta la distancia minima (que es lo mismo que maxDistancia - miDistancia) y le sumo algo de las distancias maximas (max*0.35 para que se tenga algo en cuenta, la constante la he calculado a partir de desarrollo empirico), para que tambien se tengan en cuenta. Devuelvo mi puntuacion respecto a objetos, fichas en casillas seguras, etc. Va bastante bien, de hecho le vence a los 3 ninjas, aunque se podria mejorar un poco, estoy satisfecho.
 
 El codigo final seria el siguiente:
 ```java
-//TODO: codigo
+double AIPlayer::Heuristica4(const Parchis &state, int player) {
+    int enemy_player = (player + 1) % 2;
+
+    if (state.getWinner() == player)    return gana;
+    else if (state.getWinner() == enemy_player) return pierde;
+
+    // Distancias y valores para los objetos
+    vector<int> distances;
+    int player_score = 0, enemy_score = 0;
+
+    for (auto color : state.getPlayerColors(player)) {
+        int sum = 0;
+        int piece_id = 0;
+        for (auto piece : state.getBoard().getPieces(color)) {
+            int distance = state.distanceToGoal(color, piece_id);
+            sum += distance;
+
+            if (state.isSafePiece(color, piece_id)) player_score++;
+            else if (piece.get_box().type == goal)  player_score += 5;
+            else if (piece.get_box().type == home)  player_score -= 10;
+
+            piece_id++;
+        }
+        distances.push_back(sum);
+    }
+
+    int min_player = min(distances[0], distances[1]);
+    int max_player = max(distances[0], distances[1]);
+    int sum_player = min_player + 0.35 * max_player; // Para tener algo en cuenta las fichas del otro color
+    distances.clear();
+
+    for (auto enemyColor : state.getPlayerColors(enemy_player)) {
+        int sum = 0;
+        int piece_id = 0;
+        for (auto piece : state.getBoard().getPieces(enemyColor)) {
+            int distance =  state.distanceToGoal(enemyColor, piece_id);
+            sum += distance;
+
+            if (state.isSafePiece(enemyColor, piece_id)) enemy_score++;
+            else if (piece.get_box().type == goal)  enemy_score += 5;
+            else if (piece.get_box().type == home)  enemy_score -= 10;
+
+            piece_id++;
+        }
+        distances.push_back(sum);
+    }
+
+    int min_enemy = min(distances[0], distances[1]);
+    int max_enemy = max(distances[0], distances[1]);
+    int sum_enemy = min_enemy + 0.35 * max_enemy; // Para tener algo en cuenta las fichas del otro color
+
+    for (auto specialDices : state.getAvailableSpecialDices(player)) {
+        for (auto enemySpecialDices : state.getAvailableSpecialDices(enemy_player)) {
+            if (specialDices == horn and enemySpecialDices == (red_shell or blue_shell))    player_score += 30;
+            else if (specialDices == (red_shell or blue_shell) and enemySpecialDices == horn)   enemy_score += 30;
+
+            if (specialDices == bullet) player_score += 40;
+            if (specialDices == mushroom)   player_score += 6;
+            if (specialDices == red_shell)  player_score += 10;
+            if (specialDices == blue_shell) player_score += 15;
+
+            if (enemySpecialDices == bullet)    enemy_score += 40;
+            if (enemySpecialDices == mushroom)  enemy_score += 6;
+            if (enemySpecialDices == red_shell)  enemy_score += 10;
+            if (enemySpecialDices == blue_shell) enemy_score += 15;
+        }
+    }
+
+    return -sum_player + sum_enemy + player_score - enemy_score;
+}
 ```
 
 ## Implementación Poda Alfa-Beta
@@ -335,46 +414,43 @@ He mejorado levemente el codigo, porque como se puede apreciar en el pseudocodig
 
 Ahora, la funcion es correcta y da buenos resultados, he aqui el codigo:
 ```java
-double AIPlayer::podaAlphaBeta(const Parchis *state, int depth, int player, color &best_piece, int &best_piece_id, 
-                               int &best_dice, bool maximizingPlayer, double alpha, double beta,
-                               double(*heuristica)(const Parchis&,int)) const {
-    if((*state).gameOver()){
-        if((*state).getWinner() == player) return gana;
-        else return pierde;
-    }
-    if (depth == 0)
-        return Heuristica2(*state, player);
+double AIPlayer::podaAlphaBeta(const Parchis *state, const int depth, const int player, color &best_piece, int &best_piece_id, 
+                               int &best_dice, double alpha, double beta,
+                               double(*heuristica)(const Parchis&, int)) const {
+    
+    if (depth == PROFUNDIDAD_ALFABETA or state->gameOver())
+        return heuristica(*state, player);
 
-    ParchisBros children = (*state).getChildren();
-    if (maximizingPlayer) {
-        double maxEval = menosinf;
-        color tmp_piece = none;
-        int tmp_dice = -1, tmp_piece_id = -1;
-        for (auto child = children.begin(); child != children.end(); ++child) {
-            double eval = podaAlphaBeta(&(*child), depth - 1, player, tmp_piece, tmp_piece_id, tmp_dice, false, alpha, beta, heuristica);
-            if (eval > maxEval) {
-                maxEval = eval;
-                best_piece = child.getMovedColor();
-                best_dice = child.getMovedDiceValue();
-                best_piece_id = child.getMovedPieceId();
+    ParchisBros children = state->getChildren();
+    ParchisBros::Iterator it = children.begin();
+    bool es_nodo_max = state->getCurrentPlayerId() == player;
+
+    if (es_nodo_max) {
+        while (it != children.end()) {
+            double eval = podaAlphaBeta(&(*it), depth + 1, player, best_piece, best_piece_id, best_dice, alpha, beta, heuristica);
+
+            if (eval > alpha) {
+                alpha = eval;
+                if (depth == 0) {
+                    best_piece = it.getMovedColor();
+                    best_piece_id = it.getMovedPieceId();
+                    best_dice = it.getMovedDiceValue();
+                }
             }
-            alpha = std::max(alpha, eval);
-            if (beta <= alpha) // Poda Beta
-                break;
+
+            if (alpha >= beta)   return beta;
+            ++it;
         }
-        return maxEval;
+        return alpha;
+
     } else {
-        double minEval = masinf;
-        for (auto child = children.begin(); child != children.end(); ++child) {
-            double eval = podaAlphaBeta(&(*child), depth - 1, player, best_piece, best_piece_id, best_dice, true, alpha, beta, heuristica);
-            if (eval < minEval) {
-                minEval = eval;
-            }
-            beta = std::min(beta, eval);
-            if (beta <= alpha) // Poda Alpha
-                break;
+        while (it != children.end()) {
+            double eval = podaAlphaBeta(&(*it), depth + 1, player, best_piece, best_piece_id, best_dice, alpha, beta, heuristica);
+            beta = min(beta, eval);
+            if (alpha >= beta)  return alpha;
+            ++it;
         }
-        return minEval;
+        return beta;
     }
 }
 ```
