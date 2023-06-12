@@ -1,23 +1,7 @@
 # Memoria de la Practica 3
 ## Alumno : Leon Elliott Fuller
 
-# Introduccion
-En esta memoria iré explicando el **avance** de la práctica, es decir, los distintos **planetamientos** de la práctica junto con sus distintas **implementaciones** y métodos.
-A lo largo de la memoria se va a tener en cuenta lo siguiente:
-* **Diseño** de los métodos propuestos
-* **Implementación** de los métodos propuestos
-* **Alternativas** de los métodos propuestos
-* **Ventajas** y **Desventajas** de los métodos propuestos
-    * Alternativas de los métodos propuestos
-        * El por qué falla/triunfa un método/algoritmo
-
-Aunque en resumen, lo realmente importante es dar con una **buena funcion heurística**, algo que a simple vista no se puede razonar. Es por ello, que empezaré por lo más básico (el tutorial) hasta avanzar a lo que sería la implementación final.
-
-# Objetivo
-El objetivo de esta memoria es intentar ir explicando y plasmando las ideas / correcciones / problemas que van surgiendo a lo largo de la práctica con el objetivo de plasmar cierto avance, además de poder disfrutar de la puntuación máxima asignada a esta tarea.
-
-
-# Heuristica
+# Primera Heuristica
 De este primer avance podemos concluir que tendremos que tener en cuenta los distintos aspectos del juego para añadir en nuestra heurística:
 * Formar una **barrera**
 * La **distancia** requerida para llegar a la **meta**
@@ -26,7 +10,7 @@ De este primer avance podemos concluir que tendremos que tener en cuenta los dis
 * Intentar **priorizar** cuando se pueda, **sacar** las fichas de **casa**, es decir, mientras más fichas tengamos en el tablero, más chances tenemos de coger objetos, comer fichas enemigas/aliadas, crear barreras, etc. Tener fichas en el tablero aumenta significativamente nuestros chances de ganar
 
 
-# Heuristica v2
+# Segunda Heuristica
 ## Planteamiento
 Al implementar la heuristica, voy a priorizar lo siguiente de mayor a menor:
 * Llegar a la **meta**: *esto implica **cualquier** moviemiento que permita a la ficha llegar a la meta*. *Ej* --> *comerse a una ficha, usar la bala, etc..*
@@ -73,17 +57,11 @@ function minimax(position, depth, alpha, beta, maximizinPlayer)
 		return minEval;
 ```
 
-# Encuentro Final
+# Encuentro Final (Heuristica final)
 ## Observaciones
-Con las **implementaciones anteriores**, he llegado al verdadero **fracaso**, es por ello, que voy a implementar una heuristica desde 0 para al menos intentar ganarle a los dos primeros ninjas, ya que me estoy quedando sin tiempo y tengo bastantes examenes por delante.
+Con las **implementaciones anteriores**, he llegado al verdadero **fracaso**, es por ello, que voy a implementar una heuristica desde 0 para al menos intentar ganarle a los dos primeros ninjas, ya que me estoy quedando sin tiempo y tengo bastantes examenes por delante. Algo que ha funcionado muy bien es tener en cuenta las distancias, ya que, es algo sencillo de hacer, pero con una buena lógica creo que es lo que puede hacer que el bot funcione bien, porque todo el tema de sacrificar fichas, formar barreras, etc se hace practicamente automático, porque a traves del Poda alfa beta, dependiendo de las posiciones de las fichas, se escoge el tablero que tenga a las fichas mas cercanas de la meta (penalizando mucho las fichas comidas y teniendo en cuenta la posicion del enemigo)
 
-Al ver la heurística jugar varias partidas, me estoy dando cuenta de algo **fundamental**, y es que, si tengo una ficha de color azul a 20 de **distancia** para ganar, pero tengo 3 fichas de color verde a 7 de distancia para ganar, la heurística se lo toma de la misma manera que si hay una ficha de color azul a 20 casillas de ganar la partida y 3 fichas de color verde en casa, y no estoy muy seguro de por qué, no obstante, es algo que tengo que modificar para poder ganarle al ninja 3. 
-
-La heurística anterior (heuristica 3) le asigna valores subjetivos a los objetos, algo que no está del todo mal, pero voy a intentar configurarlo de manera que se puedan 'equilibrar' las ponderaciones de los objetos, me refiero a que por ejemplo, si el rival tiene un caparazón azul, mi 'counterplay' sería tener la bocina, para evitar el ataque, además de evitar que el rival avance tantas casillas como se le asigne por comerme a una o dos fichas (dependiendo de si mis fichas están formando una barrera, pueden ser golpeados ambos, algo MUY malo para mi).
-
-No obstante, por las partidas que estoy jugando sin tener en cuenta los objetos, tampoco va tan mal, sino que creo que el jugo de la practica está en lo que he comentado anteriormente sobre las **distancias**. Tambien, he de tener en cuenta y admitir que he buscado informacion acerca de estos juegos sobre distancias, y aunque hayan objetos, caminos distintos, variedades, etc lo imprescindible para analizar la situacion del tablero de la partida, o del estado del juego es lo cerca que estás de ganar, al fin y al cabo, **si mi rival es un deportista de atleta y yo un simple campesino, si a mi me ponen a 1cm de la meta y a él a 1metro, voy a ganar debido a las distancias, independientemente si mi rival me podría superar en las mismas condiciones de distancia**, entonces creo que la clave del éxito está ahí. Además mi teoría se refuerza con el hecho de que los ****objetos** solamente pueden ser escogidos y usados una unica vez, por tanto, **son** una **herramienta** para ganar, pero realmente no hay que hacerle mucho incapié.
-
-Por tanto, creo que la clave está en ir asignando valores subjetivos para ponderar los datos e ir probando las partidas para ver cual es el que tiene mas exito, entonces la idea es la **clave** pero lo que va a hacer ganar la mayoría de veces son las **constantes** que voy modificando para adaptarlos al mejor juego posible.
+La heurística anterior (heuristica 3) le asigna valores subjetivos a los objetos, algo que no está del todo mal, pero voy a intentar configurarlo de manera que se puedan 'equilibrar' las ponderaciones de los objetos, me refiero a que por ejemplo, si el rival tiene un caparazón azul, mi 'counterplay' sería tener la bocina, para evitar el ataque, además de evitar que el rival avance tantas casillas como se le asigne por comerme a una o dos fichas (dependiendo de si mis fichas están formando una barrera, pueden ser golpeados ambos, algo MUY malo para mi). Un fallo ha sido **asignar valores aleatorios a las cosas**, es decir, **deberia realmente poner valores logicos a lo que representa cada cosa**. Un ejemplo, es que la bala le asignaba un valor de 120, algo no logico, porque si la distancia de una ficha desde casa hasta la meta es de 68+8+1, en la vida se va a usar la bala.
 
 ## Heuristica
 Con lo descrito anteriormente, he hecho varias modificaciones que voy a resaltar a continuacion:
@@ -100,5 +78,8 @@ Yo creo que la clave ha sido lo siguiente:
     * Para cada jugador
         * Para cada color, recorrer todas las fichas del mismo y sumar la distancia de cada ficha hacia el objetivo, como queremos que nuestras fichas esten lo mas cerca posible de la meta, lo guardo en una variable que vaya sumando el conjunto de distancias de las fichas de cada color.
         * Compruebo si las fichas están en casillas seguras, si estan en el tablero, etc.. Esto lo he tomado de la heuristica ValoracionTest
+* Los valores de por ejemplo, multiplicar el color de las fichas mas lejanas a la meta por 0.23 es algo que he ido probando conforme he jugado partidas, hasta ver que con dicha constante las partidas han sido las óptimas. Lo mismo para los valores incrementales de las casillas seguras, y para cuando las fichas están en casa o en la meta.
 
-Con todo esto, devuelvo la distancia de mis fichas en negativo, teniendo en cuenta la distancia minima (que es lo mismo que maxDistancia - miDistancia) y le sumo algo de las distancias maximas (max*0.35 para que se tenga algo en cuenta, la constante la he calculado a partir de desarrollo empirico), para que tambien se tengan en cuenta. Devuelvo mi puntuacion respecto a objetos, fichas en casillas seguras, etc. Va bastante bien, de hecho le vence a los 3 ninjas, aunque se podria mejorar un poco, estoy satisfecho.
+Entonces, el planteamiento de la heuristica es fundamental, lo unico que, a través de partidas, se pueden ajustar los valores para sacarle el mejor funcionamiento.
+
+Con todo esto, devuelvo la distancia de mis fichas en negativo, teniendo en cuenta la distancia minima (que es lo mismo que maxDistancia - miDistancia) y le sumo algo de las distancias maximas (max*0.23 para que se tenga algo en cuenta, la constante la he calculado a partir de desarrollo empirico), para que tambien se tengan en cuenta. Devuelvo mi puntuacion respecto a objetos, fichas en casillas seguras, etc. Va bastante bien, de hecho le vence a los 3 ninjas, aunque se podria mejorar un poco, estoy satisfecho.

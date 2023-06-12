@@ -854,7 +854,7 @@ double AIPlayer::Heuristica4(const Parchis &state, int player) {
 
     int min_player = min(distances[0], distances[1]);
     int max_player = max(distances[0], distances[1]);
-    int sum_player = min_player + 0.35 * max_player; // Para tener algo en cuenta las fichas del otro color
+    int sum_player = min_player + 0.23 * max_player; // Para tener algo en cuenta las fichas del otro color
     distances.clear();
 
     for (auto enemyColor : state.getPlayerColors(enemy_player)) {
@@ -875,7 +875,7 @@ double AIPlayer::Heuristica4(const Parchis &state, int player) {
 
     int min_enemy = min(distances[0], distances[1]);
     int max_enemy = max(distances[0], distances[1]);
-    int sum_enemy = min_enemy + 0.35 * max_enemy; // Para tener algo en cuenta las fichas del otro color
+    int sum_enemy = min_enemy + 0.23 * max_enemy; // Para tener algo en cuenta las fichas del otro color
 
     for (auto specialDices : state.getAvailableSpecialDices(player)) {
         for (auto enemySpecialDices : state.getAvailableSpecialDices(enemy_player)) {
