@@ -1,4 +1,7 @@
-# Parchís Mario Bros Style 2022/2023 Course
+# Parchís Mario Bros Style 2022/2023 Project
+<p align="center">
+  <img src="https://github.com/leonfullxr/AI-for-Ludo-game/blob/main/data/textures/product-mario-party.jpg" alt="portrait image"/>
+</p>
 
 ## Introduction
 To adapt the popular Parchís game to the requirements of the subject, the random behavior of rolling a die is replaced by choosing a die from the available ones. The set of available dice will, a priori, consist of the 6 values of a regular die. Each time one of the dice is used, that value is expended, and the player must choose a different die in the next turn. When all values of the die have been spent, it regenerates completely. Eventually, special values like 10 or 20 will be added to the classic die values to be used at specific moments.
