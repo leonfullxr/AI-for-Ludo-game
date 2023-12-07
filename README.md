@@ -1,215 +1,102 @@
-# El juego del Parchís estilo Mario Bros curso 2022/2023
+# Parchís Mario Bros Style 2022/2023 Course
 
-## Introducción
-Para adaptar el popular juego Parchís a los requisitos de la asignatura, se sustituye el comportamiento
-aleatorio de tirar un dado por la elección del dado entre los dados disponibles. El conjunto de dados
-disponible será, a priori, los 6 valores de un dado. Cada vez que se utilice uno de los dados ese valor se
-gastará, teniendo que elegir en el siguiente turno un dado diferente. Cuando se hayan gastado todos los
-valores del dado, se regenera por completo. Eventualmente, a los 6 valores del dado clásico se añadirán
-valores especiales como 10 o 20 para ser utilizados en el momento.
+## Introduction
+To adapt the popular Parchís game to the requirements of the subject, the random behavior of rolling a die is replaced by choosing a die from the available ones. The set of available dice will, a priori, consist of the 6 values of a regular die. Each time one of the dice is used, that value is expended, and the player must choose a different die in the next turn. When all values of the die have been spent, it regenerates completely. Eventually, special values like 10 or 20 will be added to the classic die values to be used at specific moments.
 
-Además, en lugar de elegir cada jugador un color pudiendo jugar entre 2-4 jugadores, en este caso
-siempre habrá 2 jugadores que jugarán con dos colores alternos. Cada vez que le toque a un jugador, con
-el dado que elija sacar podrá mover una ficha de cualquiera de sus dos colores. Aunque cada jugador
-controle a dos colores, estos colores podrán atacarse entre sí. Por ejemplo, aunque un jugador esté
-jugando con los colores amarillo y rojo, cuando se mueve una ficha amarilla a una casilla no segura
-donde había previamente una roja, la ficha amarilla se come a la ficha roja aunque sean del mismo
-jugador.
-El objetivo de PARCHÍS es conseguir meter TODAS las fichas de uno de nuestros colores en su casilla
-destino. Gana la partida el primer jugador que consiga meter TODAS las fichas de CUALQUIERA
-de sus colores, independientemente de dónde estén el resto de sus fichas.
+In addition, instead of each player choosing a color, allowing for 2-4 players to play, in this case, there will always be 2 players playing with two alternating colors. Whenever it's a player's turn, with the chosen die, they can move a piece of any of their two colors. Even though each player controls two colors, these colors can attack each other. For example, even if a player is playing with yellow and red, when moving a yellow piece to an unsafe square where there was previously a red one, the yellow piece captures the red piece, even if they belong to the same player.
 
-## Reglas del juego
-Las reglas del juego son las mismas que las del Parchís clásico, con las siguientes mejoras / items nuevos que derivan del Mario Bros:
+The goal of PARCHÍS is to get ALL pieces of one of our colors into their destination square. The player who manages to get ALL pieces of ANY of their colors into the destination square wins the game, regardless of where the rest of their pieces are.
 
-### Normas
-1. Juegan dos jugadores con dos colores cada uno. Jugador 1 (amarillo y rojo) vs Jugador 2 (azul y
-verde). Gana el primer jugador que lleve TODAS fichas de CUALQUIERA de sus dos colores a
-la meta. En esta versión del juego, el tablero dispondrá solo de 3 fichas para cada color.
-
-2. El orden de juego es Amarillo → Azul → Rojo → Verde.
-
-3. En cada turno, el jugador elige un dado del color que toca y mueve la ficha que quiera de
-cualquiera de sus dos colores. El dado elegido se gasta y no puede volver a ser usado hasta
-que se gasten todos los dados. En ese momento reaparecen de nuevo todos los dados. Los dados
-disponibles inicialmente son los números del 1 al 6, salvo el número 3.
-
-4. Para sacar una ficha de la casa hay que sacar un 5.
-
-5. Si se saca un 6 se vuelve a tirar con el mismo color.
-6. Cuando se saca un 6 y todas las fichas de ese color están fuera de la casa, se avanza 7 casillas en
-lugar de 6.
-7. No puede haber más de dos fichas en la misma casilla, salvo en las de casa o meta. Si ya hay dos,
-una tercera ficha no podría moverse a esa casilla con su tirada.
-8. Dos fichas del mismo color en la misma casilla forman una barrera. Una ficha de otro color no
-puede pasar dicha barrera hasta que se rompa. Una ficha del mismo color sí puede saltarse la
-barrera.
-9. Si se saca un 6 y hay alguna barrera del color que toca, es obligatorio romper dicha barrera. No
-se puede mover una ficha que no sea de una barrera.
-10. Cuando una ficha llega a una casilla no segura donde hay una ficha de otro color se come esa
-ficha. Esa otra ficha vuelve a su casa. El jugador que se come la ficha se cuenta 20 con la ficha
-que desee de su color. Esto se gestiona en un turno adicional en el que el jugador solo tiene
-disponible el movimiento +20.
-11. Los dos colores de un mismo jugador pueden comerse entre sí. Por ejemplo, una ficha amarilla
-puede comerse a una roja si se da el caso, aunque las dos sean del J1.
-12. En las casillas seguras (marcadas con un círculo) pueden convivir dos fichas de distintos colores.
-No se puede comer una ficha que esté en esas casillas. Aunque haya dos fichas de distintos
-colores en una casilla segura no actúan como barrera, es decir, cualquier otra ficha puede saltarse
-esa casilla.
-13. Para llegar a la meta, hay que sacar el número exacto de casillas que faltan para llegar. Si se saca
-de más, la ficha rebota y empieza a contar hacia atrás el exceso de casillas.
-
-14. El número de rebotes totales que puede realizar un color a lo largo de una partida está limitado a
-30. Si se supera ese número, el jugador pierde la partida. Esta es una regla artificial, cuya única
-finalidad es evitar que se produzcan partidas infinitas.
-15. Cuando una ficha llega a la meta, se cuenta 10 con cualquiera de las otras fichas de su color.
-Esto se gestiona en un turno adicional en el que el jugador solo tiene disponible el movimiento
-+10.
-16. En cada turno es obligatorio elegir un dado de los que no se hayan usado. Si para el valor del
-dado elegido no se puede mover ninguna ficha se puede gastar ese dado y pasar el turno sin que
-el jugador haga ningún movimiento.
-17. Con el fin de agilizar las partidas, las fichas no aparecerán todas en casa al inicio de la partida, si
-no organizadas como vemos en la Figura 2.
-
-18. Hay un total de 10 dados especiales que pueden usarse, además de los dados del 1 al 6 clásicos.
-Al inicio de la partida aparecerán repartidos a lo largo del tablero como objetos
-coleccionables, en la disposición que se muestra en la Figura 2. Cuando un jugador cae en una
-casilla con uno de estos objetos, adquirirá el dado especial asociado y el objeto desaparecerá del
-tablero para el resto de la partida. El dado especial se podrá usar en cualquier momento y será
-de un solo uso. Son independientes a los dados del 1 al 6 en el sentido de que los dados normales
-se van gastando y renovando como se especifica en la regla 3 de forma independiente a los dados
-especiales que se tengan. Cada dado especial tiene un efecto diferente. Algunos dados darán a la
-ficha un poder especial, otros dados permitirán hacer movimientos de larga distancia y otros
-permitirán poner trampas o atacar a fichas enemigas según su posición. Los 10 dados especiales,
-que se empezarán a describir en las siguientes reglas, son: el plátano, el champiñón, la bocina,
-el caparazón rojo, el caparazón azul, la bala, el rayo, el boo, la estrella y el
-megachampiñón.
-19. Cada jugador podrá tener un máximo de 2 dados especiales en su mano. Si cae en otra casilla
-que proporciona dado teniendo ya 2, dicho dado no se cogerá y permanecerá en el tablero.
-20. Como consecuencia de algunos de los dados especiales, las fichas podrán adquirir también un
-estado especial. Los posibles estados especiales para las fichas son: ficha normal, ficha
-aplatanada, minificha, ficha fantasma, ficha invencible y megaficha. En las siguientes reglas
-se describe cómo se pueden adquirir estos estados y cómo interacciona cada tipo de fichas con el
-resto.
-
-21. El plátano es un dado especial que coloca una trampa en el tablero. Se aplica sobre una ficha. En
-la casilla en la que esté dicha ficha, se coloca una trampa plátano.
-22. Cuando una ficha (de cualquier color) esté haciendo un movimiento y en el recorrido haya una
-trampa plátano, la ficha se quedará en la casilla de la trampa y la trampa desaparecerá. El
-jugador que ha realizado el movimiento perderá el turno, aunque hubiera sacado un 6. Además,
-la ficha pasará al estado aplatanada durante un turno.
-23. Una ficha aplatanada no podrá moverse ni comer (esto incluye al propio turno en el que cae en
-la trampa). En caso de que se intente aplicar un dado normal sobre esta ficha, el dado se gastará
-y se avanzará el turno sin que la ficha avance ninguna casilla.
-24. Las fichas invencibles, fantasmas y megafichas son inmunes a la trampa plátano, pero no las
-eliminan del tablero si pasan o caen encima de ellas.
-
-25. El champiñón es un dado especial que permite avanzar a una ficha más de lo normal. Cuando se
-usa, la ficha elegida avanzará mínimo 8 casillas, independientemente del estado en el que se
-encuentre dicha ficha. Además, si la casilla de llegada estuviera ocupada, la ficha seguirá
-avanzando hasta una casilla libre. Si la ficha tenía algún estado especial lo seguirá conservando
-tras usar el champiñón. En caso de sobrepasar la meta con este objeto, la ficha no rebotará, se
-quedará en la meta.
-
-26. El caparazón rojo es un dado especial que permite eliminar a otras fichas de distinto color del
-tablero. Al aplicarse sobre una ficha, mandará a casa automáticamente a la ficha más
-cercana que esté delante de ella, ignorando barreras y/o casillas seguras. En caso de que haya
-varias a la misma distancia, eliminará a todas ellas.
-
-27. El caparazón azul es un dado especial que permite eliminar a otras fichas de distinto color del
-tablero. Al aplicarse sobre una ficha, mandará a casa automáticamente a la ficha que esté
-más cerca de la meta (que no haya llegado aún), ignorando barreras y/o casillas seguras. En
-caso de que haya varias a la misma distancia, eliminará a todas ellas.
-
-28. La bocina es un dado especial que puede usarse de dos formas diferentes. Por un lado, si se va a
-recibir el impacto de un caparazón rojo o azul cuando se tiene este dado, la bocina bloquea el
-golpe y el dado desaparece. Por otro lado, si se decide aplicar el dado sobre una ficha, se genera
-una explosión que manda a casa a todas las fichas que estén a dos casillas o menos de distancia
-de la ficha seleccionada.
-29. Las fichas invencibles, fantasmas, megafichas y fichas del mismo color no se ven afectadas
-por la explosión de la bocina.
-30. Las fichas invencibles y megafichas no se verán afectadas por los efectos de los caparazones,
-tanto rojo como azul. Las fichas fantasma serán ignoradas cuando se utilicen caparazones, y la
-ficha objetivo pasará a ser la siguiente más cercana/cercanas a la meta, respectivamente.
-
-31. La bala es un dado especial que permite avanzar a una ficha más de lo normal. Cuando se usa, la
-ficha elegida avanzará mínimo 40 casillas, independientemente del estado en el que se encuentre
-dicha ficha. Además, si la casilla de llegada estuviera ocupada, la ficha seguiría avanzando hasta
-una casilla libre. La ficha perderá cualquier condición especial que tuviera y volverá a ser
-normal. En caso de sobrepasar la meta con este objeto, la ficha no rebotará; se quedará en la
-meta.
-32. Tanto la bala como el champiñón pueden atravesar barreras y megabarreras (estas últimas se
-describen más adelante).
-
-33. El rayo es un dado especial que perjudica a casi todas las fichas, salvo a las del color
-seleccionado. Cuando se utiliza, el resto de fichas, salvo las invencibles, fantasmas y
-megafichas pasarán a ser minifichas durante 5 turnos, adquiriendo las debilidades que se
-indican en las siguientes reglas. Las megafichas volverán a ser normales tras usar el rayo.
-Además, al usar el rayo el jugador rival pierde el último objeto que adquirió.
-34. Una minificha se moverá a la mitad de velocidad (división entera) cuando se use un dado normal.
-Por ejemplo, si una minificha se mueve sacando un uno en el dado, no avanzará ninguna casilla.
-35. Las barreras formadas por minifichas son atravesables por cualquier otra ficha. Además, las
-minifichas no pueden comerse a otras fichas. Convivirán con la otra ficha en la casilla de destino,
-independientemente del color
-
-36. El boo es un dado especial que da poderes a la ficha elegida. Cuando se utiliza, la ficha pasará al
-estado fantasma durante 5 turnos. Además, robará el último dado adquirido por el jugador rival,
-en caso de que tuviera alguno, y pasará a formar parte de los dados del jugador actual.
-37. Una ficha fantasma puede convivir con cualquier otra ficha en casillas seguras y no seguras. No
-puede comer ni ser comida. Tampoco se ve afectada por las acciones de las fichas invencibles y
-megafichas . Además, puede atravesar barreras y megabarreras.
-
-38. La estrella es un dado especial que da poderes especiales a la ficha elegida. Cuando se utiliza, la
-ficha pasará al estado invencible durante 3 turnos.
-
-39. Una ficha invencible no puede ser comida. Si una ficha de otro color intenta adelantar o comer a
-una ficha invencible, quedará eliminada y volverá a su casa. Además, cuando una ficha
-invencible hace un movimiento, elimina a todas (salvo las excepciones de las siguientes reglas)
-las fichas de distinto color que se encuentra por su camino, incluyendo barreras y fichas en
-casillas seguras, aunque nunca se cuenta 20 por ninguna de las fichas que elimine.
-40. Las fichas invencibles se cuentan 2 unidades de más por cada movimiento que realicen con un
-dado normal.
-41. Las fichas fantasma y megafichas no se ven afectadas por los efectos de la ficha invencible al
-moverse.
-
-42. El megachampiñón es un dado especial que da poderes a la ficha elegida. Cuando se utiliza, la
-ficha pasará al estado megaficha durante 3 turnos.
-43. Una megaficha ocupa 2 casillas: la casilla de la que partía cuando era normal, y la siguiente.
-No podrá hacerse grande si en la casilla actual o en la siguiente hay fichas del mismo color,
-fichas invencibles u otras megafichas. En caso contrario, al hacerse grande eliminará a todas
-las fichas que estuvieran ocupando ambas casillas, salvo a las fantasmas, con las que sí pueden
-convivir.
-44. Una megaficha no podrá moverse a pares de casillas contiguas en las que haya una ficha del
-mismo color, fichas invencibles u otras megafichas. En caso contrario, al moverse se comerá
-a todas las fichas que haya en esas dos casillas, salvo a las fantasmas, con las que sí pueden
-convivir. Nunca se cuentan 20 por las fichas que se coman estando en este estado.
-45. Una megaficha por sí sola actúa como una megabarrera. No deja pasar a ninguna otra ficha
-de distinto color, ni siquiera a fichas invencibles u otras megafichas. Solo las fichas fantasma
-pueden atravesar megabarreras.
-46. En el turno en el que la megaficha vuelva a ser pequeña, esta se queda en la casilla más
-avanzada de entre las dos que ocupaba. La megaficha llega a la meta en el momento en el que
-una de las dos casillas que ocupe sea la meta. En dicho momento se hace pequeña
-automáticamente.
-
-47. Los turnos que duran los estados especiales de las fichas se van contando en el turno del jugador
-al que le pertenecen las fichas. Por ejemplo, una ficha en estado invencible de color amarillo
-durará en este estado durante los 3 próximos movimientos del jugador amarillo-rojo. Si en uno
-de esos turnos se saca un 6 o se realiza un movimiento +20 o +10 por comer o llegar a la meta,
-ese movimiento extra también decrementa el contador de invencibilidad. Igual para cualquier
-otro estado especial.
-
-## Objetivos de la práctica
-La práctica tiene como objetivo diseñar e implementar un agente deliberativo que pueda llevar a cabo un
-comportamiento inteligente dentro del juego PARCHÍS que se ha explicado anteriormente. 
-Para poder tener un agente deliberativo, se tendra que hacer la 
-implementación del algoritmo MINIMAX o del algoritmo de PODA ALFA-BETA, para dotar de comportamiento inteligente deliberativo a un jugador artificial para este juego, de manera que esté en condiciones de competir y ganar a sus adversarios.
-
-## Prerrequisitos
-El software usa la librería [SFML](https://www.sfml-dev.org/index.php), por lo que debes instalarla según tu versión de linux:
-- En Ubuntu: sudo apt install libsfml-dev
-- En MacOS: brew install sfml
+## Prerequisites
+The software uses the [SFML library](https://www.sfml-dev.org/index.php), so you must install it according to your Linux version:
+- On Ubuntu: `sudo apt install libsfml-dev`
+- On MacOS: `brew install sfml`
 - Ubuntu/Debian: `sudo apt install libsfml-dev`
 - Arch: `sudo pacman -S sfml`
-- Fedora/CentOS/Suse: `sudo dnf -y install SFML-devel` o `sudo yum -y install SFML-devel`
+- Fedora/CentOS/Suse: `sudo dnf -y install SFML-devel` or `sudo yum -y install SFML-devel`
 
-Si ninguna de estas opciones te funciona, también hay otras [opciones de instalación](https://www.sfml-dev.org/tutorials/2.5/start-linux.php)
+If none of these options work for you, there are also other [installation options](https://www.sfml-dev.org/tutorials/2.5/start-linux.php).
+
+## Game Rules
+The game rules are the same as those of classic Parchís, with the following improvements/new items derived from Mario Bros:
+
+### Rules
+1. Two players play with two colors each. Player 1 (yellow and red) vs Player 2 (blue and green). The first player to get ALL pieces of ANY of their two colors to the goal wins. In this version of the game, the board will have only 3 pieces for each color.
+
+2. The order of play is Yellow → Blue → Red → Green.
+
+3. In each turn, the player chooses a die of the corresponding color and moves any piece of either of their two colors. The chosen die is spent and cannot be used again until all dice are spent. Initially available dice are numbers 1 to 6, except for the number 3.
+
+4. To move a piece out of the house, a 5 must be rolled.
+
+5. If a 6 is rolled, roll again with the same color.
+6. When a 6 is rolled and all pieces of that color are out of the house, move 7 squares instead of 6.
+7. There cannot be more than two pieces on the same square, except in the home or goal. If there are already two, a third piece cannot move to that square with its roll.
+8. Two pieces of the same color on the same square form a barrier. A piece of another color cannot pass this barrier until it is broken. A piece of the same color can jump over the barrier.
+
+9. If a 6 is rolled, and there is a barrier of the corresponding color, it is mandatory to break that barrier. A piece not from a barrier cannot be moved.
+
+10. When a piece reaches an unsafe square with a piece of another color, it captures that piece. The captured piece returns home. The player who captures the piece scores 20 with any piece of their color. This is managed in an additional turn where the player only has the +20 movement available.
+
+11. Two colors of the same player can capture each other. For example, a yellow piece can capture a red one if the situation arises, even if both belong to Player 1.
+
+12. In safe squares (marked with a circle), two pieces of different colors can coexist. A piece on these squares cannot be captured. Even if there are two pieces of different colors on a safe square, they do not act as a barrier, meaning any other piece can jump over that square.
+
+13. To reach the goal, the exact number of squares remaining must be rolled. If more are rolled, the piece bounces back and starts counting the excess squares backward.
+
+14. The total number of bounces a color can make throughout a game is limited to 30. If this number is exceeded, the player loses the game. This is an artificial rule designed to prevent infinite games.
+
+15. When a piece reaches the goal, score 10 with any other piece of the same color. This is managed in an additional turn where the player only has the +10 movement available.
+
+16. In each turn, it is mandatory to choose a die that has not been used. If the chosen die's value does not allow any piece to move, it can be spent, and the turn can be passed without making any moves.
+
+17. To expedite games, all pieces will not start in the home at the beginning of the game but organized as seen in Figure 2.
+
+18. There is a total of 10 special dice that can be used, in addition to the classic dice from 1 to 6. At the start of the game, they will be distributed across the board as collectible objects, in the arrangement shown in Figure 2. When a player lands on a square with one of these objects, they will acquire the associated special die, and the object will disappear from the board for the rest of the game. The special die can be used at any time and is for single use. They are independent of the dice from 1 to 6 in the sense that the regular dice are used and renewed as specified in rule 3 independently of the special dice a player may have. Each special die has a different effect. Some dice give the piece a special power, others allow long-distance movements, and others allow setting traps or attacking enemy pieces based on their position. The 10 special dice, which will be described starting in the following rules, are: banana, mushroom, horn, red shell, blue shell, bullet, lightning, boo, star, and megamushroom.
+
+19. Each player can have a maximum of 2 special dice in their hand. If they land on another square that provides a die while already having 2, that die will not be picked up and will remain on the board.
+
+20. As a consequence of some of the special dice, pieces may also acquire a special state. Possible special states for pieces are: normal piece, flattened piece, mini piece, ghost piece, invincible piece, and megapiece. The following rules describe how these states can be acquired and how each type of piece interacts with the others.
+
+21. The banana is a special die that places a trap on the board. It is applied to a piece. On the square where the piece is, a banana trap is placed.
+22. When a piece (of any color) is making a move, and there is a banana trap along the path, the piece will stay on the trap square, and the trap will disappear. The player who made the move loses the turn, even if they rolled a 6. Additionally, the piece will enter the flattened state for one turn.
+23. A flattened piece cannot move or capture (this includes the turn it falls into the trap). If a normal die is attempted to be applied to this piece, the die will be spent, and the turn will advance without the piece moving.
+24. Invincible, ghost, and megapieces are immune to the banana trap, but they do not eliminate them from the board if they pass over or land on them.
+
+25. The mushroom is a special die that allows a piece to advance more than usual. When used, the chosen piece will advance a minimum of 8 squares, regardless of the piece's current state. Additionally, if the destination square is occupied, the piece will continue advancing to an empty square. If the piece had any special state, it will retain it after using the mushroom. If the goal is surpassed with this object, the piece will not bounce back and will stay at the goal.
+
+26. The red shell is a special die that allows eliminating pieces of a different color from the board. When applied to a piece, it will automatically send the nearest piece in front of it back home, ignoring barriers and/or safe squares. If there are several at the same distance, it will eliminate all of them.
+
+27. The blue shell is a special die that allows eliminating pieces of a different color from the board. When applied to a piece, it will automatically send the piece closest to the goal (that has not reached it yet) back home, ignoring barriers and/or safe squares. If there are several at the same distance, it will eliminate all of them.
+
+28. The horn is a special die that can be used in two different ways. Firstly, if about to receive the impact of a red or blue shell when having this die, the horn blocks the hit, and the die disappears. Secondly, if decided to apply the die to a piece, an explosion occurs, sending all pieces within two squares or less of the selected piece back home.
+29. Invincible, ghost, megapieces, and pieces of the same color are not affected by the horn's explosion.
+30. Invincible and megapieces are not affected by the effects of both red and blue shells. Ghost pieces are ignored when shells are used, and the target piece becomes the next closest to the goal, respectively.
+
+31. The bullet is a special die that allows a piece to advance more than usual. When used, the chosen piece will advance a minimum of 40 squares, regardless of the piece's current state. Additionally, if the destination square is occupied, the piece will continue advancing to an empty square. The piece loses any special condition it had and returns to being normal. If the goal is surpassed with this object, the piece will not bounce back; it will stay at the goal.
+32. Both the bullet and the mushroom can pass through barriers and megabarriers (the latter are described later).
+
+33. The lightning is a special die that harms almost all pieces, except those of the selected color. When used, all pieces, except invincible, ghost, and megapieces, become mini-pieces for 5 turns, acquiring the weaknesses indicated in the following rules. Megapieces return to normal after using lightning. Additionally, using lightning causes the opposing player to lose the last acquired object.
+34. A mini-piece will move at half speed (integer division) when a normal die is used. For example, if a mini-piece moves by rolling a one on the die, it will not advance any squares.
+35. Barriers formed by mini-pieces are passable by any other piece. Additionally, mini-pieces cannot capture other pieces. They will coexist with the other piece in the destination square, regardless of color.
+
+36. The boo is a special die that grants powers to the chosen piece. When used, the piece enters the ghost state for 5 turns. Additionally, it steals the last die acquired by the opposing player, if they had any, and becomes part of the current player's dice.
+37. A ghost piece can coexist with any other piece on safe and unsafe squares. It cannot capture or be captured. It is also unaffected by the actions of invincible and megapieces. Additionally, it can pass through barriers and megabarriers.
+
+38. The star is a special die that grants special powers to the chosen piece. When used, the piece enters the invincible state for 3 turns.
+
+39. An invincible piece cannot be captured. If a piece of another color attempts to overtake or capture an invincible piece, it will be eliminated and sent back home. Additionally, when an invincible piece makes a move, it eliminates all (except for the exceptions in the following rules) pieces of a different color it encounters along its path, including barriers and pieces on safe squares, although no score of 20 is counted for any of the eliminated pieces.
+40. Invincible pieces score an additional 2 units for each move made with a normal die.
+41. Ghost and megapieces are not affected by the effects of the invincible piece when moving.
+
+42. The megamushroom is a special die that grants powers to the chosen piece. When used, the piece enters the megapiece state for 3 turns.
+43. A megapiece occupies 2 squares: the square it originated from when it was normal and the next one. It cannot grow if the current or next square has pieces of the same color, invincible pieces, or other megapieces. Otherwise, upon growing, it eliminates all pieces occupying both squares, except for ghosts, with which it can coexist.
+44. A megapiece cannot move to adjacent pairs of squares where there is a piece of the same color, invincible pieces, or other megapieces. Otherwise, when moving, it will eat all the pieces in those two squares, except for ghosts, with which it can coexist. No score of 20 is counted for the pieces eaten in this state.
+45. A megapiece alone acts as a megabarrier. It does not allow any other piece of a different color to pass through, not even invincible pieces or other megapieces. Only ghost pieces can pass through megabarriers.
+46. In the turn the megapiece returns to being small, it stays in the farthest square of the two it occupied. The megapiece reaches the goal when one of the two squares it occupies is the goal. At that moment, it automatically becomes small.
+
+47. The turns that the special states of the pieces last are counted during the turn of the player to whom the pieces belong. For example, a yellow invincible piece will last in this state for the next 3 moves of the yellow-red player. If, in one of those turns, a 6 is rolled or a +20 or +10 movement is made by eating or reaching the goal, that extra move also decreases the invincibility counter. The same applies to any other special state.
+
+## Practice Objectives
+The practice aims to design and implement a deliberative agent capable of exhibiting intelligent behavior within the PARCHÍS game explained above.
+To have a deliberative agent, the implementation of the MINIMAX or ALPHA-BETA PRUNING algorithm will be necessary to provide intelligent deliberative behavior to an artificial player for this game, allowing it to compete and win against its adversaries.
