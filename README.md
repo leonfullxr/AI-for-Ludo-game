@@ -1,6 +1,6 @@
 # Parchís Mario Bros Style 2022/2023 Project
 <p style="text-align: center;">
-  <img src="https://github.com/leonfullxr/AI-for-Ludo-game/blob/main/data/textures/product-mario-party.jpg" width="40%" alt="portrait image" style="margin-right: 10px;">
+  <img src="https://github.com/leonfullxr/AI-for-Ludo-game/blob/main/data/textures/product-mario-party.jpg" width="50%" alt="portrait image" style="margin-right: 10px;">
   <img src="https://github.com/leonfullxr/AI-for-Ludo-game/blob/main/doc/img/ludo_game.png" width="40%" alt="main menu image">
 </p>
 
